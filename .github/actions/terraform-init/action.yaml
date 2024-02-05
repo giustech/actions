@@ -22,7 +22,9 @@ inputs:
   terraform_state_file:
     description: 'State file Terraform'
     required: true
-
+  terraform_bucket_name:
+    description: 'Bucket Terraform'
+    required: true
 runs:
   using: composite
   steps:
@@ -67,7 +69,7 @@ runs:
     shell: bash
     run: |
       cd terraform
-      terraform init -backend-config=bucket=${{ secrets.BUCKET_NAME }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
   - name: Upload artifact
     uses: actions/upload-artifact@v4
