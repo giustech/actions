@@ -23,9 +23,10 @@ runs:
 
     - name: Checkout code
       uses: actions/checkout@v4
-
+      
     - name: Verify Terraform Changes
       id: check_tf
+      shell: bash
       run: |
         if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.tf$'; then
           echo "tf_changed=true" >> $GITHUB_OUTPUT
@@ -35,6 +36,7 @@ runs:
 
     - name: Verify Golang Changes
       id: check_go
+      shell: bash
       run: |
         if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.go$'; then
           echo "go_changed=true" >> $GITHUB_OUTPUT
@@ -44,6 +46,7 @@ runs:
 
     - name: Loading Terraform State Key
       id: terraform_file
+      shell: bash
       run: |
         TERRAFORM_STATE_FILE="${{ github.head_ref || github.ref_name }}/${{ github.event.repository.name }}/terraform.tfstate"
         echo "terraform_state_file=$TERRAFORM_STATE_FILE" >> $GITHUB_OUTPUT
@@ -51,5 +54,6 @@ runs:
 
     - name: Loading Branch Name
       id: get_branch
+      shell: bash
       run: |
         echo "branch_name=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
