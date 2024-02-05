@@ -1,0 +1,87 @@
+name: 'Terraform Init'
+description: 'terraform init commands'
+inputs:
+  aws_account_number:
+    description: 'Account Number'
+    required: true
+    default: '067408622363'
+  aws_role_name:
+    description: 'Aws role with polices to deploy'
+    required: true
+    default: 'github-actions'
+  aws_region: 
+    description: 'Aws region'
+    required: true
+    default: 'aws-region'
+  token_endpoint:
+    description: 'Endpoint to generate accesstoken'
+    required: true
+  token_endpoint_x_api_key:
+    description: 'XApiKey to generate accesstoken'
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+
+  - name: configure aws credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+      role-session-name: ${{ inputs.aws_role_name }}
+      aws-region: ${{ inputs.aws_region }}
+
+  - name: Get Access Token
+    shell: bash
+    id: get-token
+    run: |
+      TOKEN=$(curl -X GET -H "Content-Type: application/json" -H "x-api-key: ${{ inputs.token_endpoint_x_api_key }}" ${{ inputs.token_endpoint }})
+      echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+  - name: Update Github token
+    shell: bash
+    run: |
+      git config --global url."https://x-access-token:${{ steps.get-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+
+  - name: Cache Terraform modules
+    uses: actions/cache@v3
+    with:
+      path: |
+        terraform/.terraform/modules
+        terraform/.terraform/providers
+      key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
+      restore-keys: |
+        ${{ runner.os }}-terraform-
+
+  - name: Terraform Key
+    shell: bash
+    run: |
+      echo "Key: ${{ needs.init.outputs.terraform_state_file }}"
+
+  - name: Terraform Init
+    shell: bash
+    run: |
+      cd terraform
+      terraform init -backend-config=bucket=${{ secrets.BUCKET_NAME }} -backend-config=key=${{ needs.init.outputs.terraform_state_file }} -backend-config=region=us-east-1
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: terraform
+      path: terraform
+
+
+
+
+
+
+
+
+
+
+
+
+

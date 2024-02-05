@@ -1,9 +1,5 @@
 name: 'Custom Init Action'
 description: 'Executa a inicialização do workflow, incluindo verificações de arquivos modificados'
-inputs:
-  github_token:
-    description: 'GitHub token'
-    required: true
 outputs:
   tf_changed:
     value: ${{ steps.check_tf.outputs.tf_changed }}
