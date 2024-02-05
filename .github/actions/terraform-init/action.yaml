@@ -12,7 +12,7 @@ inputs:
   aws_region: 
     description: 'Aws region'
     required: true
-    default: 'aws-region'
+    default: 'us-east-1'
   token_endpoint:
     description: 'Endpoint to generate accesstoken'
     required: true
