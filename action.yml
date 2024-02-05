@@ -1,0 +1,55 @@
+name: 'Custom Init Action'
+description: 'Executa a inicialização do workflow, incluindo verificações de arquivos modificados'
+inputs:
+  github_token:
+    description: 'GitHub token'
+    required: true
+outputs:
+  tf_changed:
+    value: ${{ steps.check_tf.outputs.tf_changed }}
+    description: 'Indica se arquivos .tf foram modificados'
+  go_changed:
+    value: ${{ steps.check_go.outputs.go_changed }}
+    description: 'Indica se arquivos .go foram modificados'
+  terraform_state_file:
+    value: ${{ steps.terraform_file.outputs.terraform_state_file }}
+    description: 'O caminho para o arquivo de estado do Terraform'
+  branch_name:
+    value: ${{ steps.get_branch.outputs.branch_name }}
+    description: 'O nome da branch atual'
+runs:
+  using: composite
+  steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Verify Terraform Changes
+      id: check_tf
+      run: |
+        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.tf$'; then
+          echo "tf_changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "tf_changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Verify Golang Changes
+      id: check_go
+      run: |
+        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.go$'; then
+          echo "go_changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "go_changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Loading Terraform State Key
+      id: terraform_file
+      run: |
+        TERRAFORM_STATE_FILE="${{ github.head_ref || github.ref_name }}/${{ github.event.repository.name }}/terraform.tfstate"
+        echo "terraform_state_file=$TERRAFORM_STATE_FILE" >> $GITHUB_OUTPUT
+
+
+    - name: Loading Branch Name
+      id: get_branch
+      run: |
+        echo "branch_name=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
