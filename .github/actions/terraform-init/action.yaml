@@ -19,7 +19,9 @@ inputs:
   token_endpoint_x_api_key:
     description: 'XApiKey to generate accesstoken'
     required: true
-
+  terraform_state_file:
+    description: 'State file Terraform'
+    required: true
 
 runs:
   using: composite
@@ -59,13 +61,13 @@ runs:
   - name: Terraform Key
     shell: bash
     run: |
-      echo "Key: ${{ needs.init.outputs.terraform_state_file }}"
+      echo "Key: ${{ inputs.terraform_state_file }}"
 
   - name: Terraform Init
     shell: bash
     run: |
       cd terraform
-      terraform init -backend-config=bucket=${{ secrets.BUCKET_NAME }} -backend-config=key=${{ needs.init.outputs.terraform_state_file }} -backend-config=region=us-east-1
+      terraform init -backend-config=bucket=${{ secrets.BUCKET_NAME }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
   - name: Upload artifact
     uses: actions/upload-artifact@v4
