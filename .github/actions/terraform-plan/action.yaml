@@ -58,7 +58,4 @@ runs:
   - name: Terraform Plan
     shell: bash
     run: |
-      set -a
-      source $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
-      set +a
       terraform plan
