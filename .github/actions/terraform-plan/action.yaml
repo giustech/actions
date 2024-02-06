@@ -55,11 +55,7 @@ runs:
 
   - name: Processa lista multilinha
     run: |
-      IFS=$'\n' read -r -d '' -a minha_lista <<< "${{ inputs.terraform_env_file }}"
-      for i in "${minha_lista[@]}"
-      do
-        echo "Item: $i"
-      done
+      echo ${{ inputs.terraform_env_file }}
     shell: bash
 
   # - name: Print env file
