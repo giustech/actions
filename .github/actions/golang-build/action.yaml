@@ -1,0 +1,72 @@
+name: 'Golang Build'
+description: 'Golang Build Applications'
+inputs:
+  go-version:
+    description: 'go version'
+    required: true
+    default: '^1.19'
+  token_endpoint:
+    description: 'Endpoint to generate accesstoken'
+    required: true
+  token_endpoint_x_api_key:
+    description: 'XApiKey to generate accesstoken'
+    required: true
+  artifact_name:
+    description: 'Artifact builded name'
+    required: true
+  artifact_main_path:
+    description: 'Artifact main path'
+    required: true
+runs:
+  using: composite
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+
+  - name: Set up Go
+    uses: actions/setup-go@v4
+    with:
+      go-version: ${{ inputs.go-version }}
+
+  - name: Clean mod cache
+    run: go clean --modcache
+    shell: bash
+
+  - uses: actions/cache@v3
+    with:
+      path: |
+        ~/.cache/go-build
+        ~/go/pkg/mod
+      key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      restore-keys: |
+        ${{ runner.os }}-go-
+
+  - name: Get Access Token
+    shell: bash
+    id: get-token
+    run: |
+      TOKEN=$(curl -X GET -H "Content-Type: application/json" -H "x-api-key: ${{ inputs.token_endpoint_x_api_key }}" ${{ inputs.token_endpoint }})
+      echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+  - name: Update Github token
+    shell: bash
+    run: |
+      git config --global url."https://x-access-token:${{ steps.get-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+      
+  - name: Tidy
+    shell: bash
+    run: go mod tidy
+
+  - name: Download dependencies
+    shell: bash
+    run: go mod download
+
+  - name: Building Api
+    shell: bash
+    run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: ${{ inputs.artifact_name }}
+      path: ${{ inputs.artifact_name }}

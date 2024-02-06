@@ -29,8 +29,6 @@ inputs:
     description: 'Bucket Terraform'
     required: true
     default: .env
-    
-
 runs:
   using: composite
   steps:
