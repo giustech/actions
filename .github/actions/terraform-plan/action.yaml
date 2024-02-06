@@ -1,0 +1,60 @@
+name: 'Terraform Plan'
+description: 'terraform plan commands'
+inputs:
+  aws_account_number:
+    description: 'Account Number'
+    required: true
+    default: '067408622363'
+  aws_role_name:
+    description: 'Aws role with polices to deploy'
+    required: true
+    default: 'github-actions'
+  aws_region: 
+    description: 'Aws region'
+    required: true
+    default: 'us-east-1'
+  token_endpoint:
+    description: 'Endpoint to generate accesstoken'
+    required: true
+  token_endpoint_x_api_key:
+    description: 'XApiKey to generate accesstoken'
+    required: true
+  terraform_state_file:
+    description: 'State file Terraform'
+    required: true
+  terraform_bucket_name:
+    description: 'Bucket Terraform'
+    required: true
+  terraform_env_file:
+    description: 'Bucket Terraform'
+    required: true
+    default: .env
+runs:
+  using: composite
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+
+  - name: configure aws credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+      role-session-name: ${{ inputs.aws_role_name }}
+      aws-region: ${{ inputs.aws_region }}
+
+  - name: Download Artifact
+    uses: actions/download-artifact@v4
+    with:
+      name: terraform
+
+  - name: Set permissions for Terraform providers
+    shell: bash
+    run: chmod -R +x .
+
+  - name: Terraform Plan
+    shell: bash
+    run: |
+      set -a
+      source $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
+      set +a
+      terraform plan
