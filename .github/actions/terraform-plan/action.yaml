@@ -29,6 +29,8 @@ inputs:
     description: 'Bucket Terraform'
     required: true
     default: .env
+    
+
 runs:
   using: composite
   steps:
@@ -51,14 +53,23 @@ runs:
     shell: bash
     run: chmod -R +x .
 
-  - name: Print env file
-    shell: bash
-    run: cat $GITHUB_WORKSPACE/default.tfvars
-
-  - name: Terraform Plan
-    shell: bash
+  - name: Processa lista multilinha
     run: |
-      set -a
-      source $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
-      set +a
-      terraform plan
+      IFS=$'\n' read -r -d '' -a minha_lista <<< "${{ inputs.seu_input }}"
+      for i in "${minha_lista[@]}"
+      do
+        echo "Item: $i"
+      done
+    shell: bash
+
+  # - name: Print env file
+  #   shell: bash
+  #   run: cat $GITHUB_WORKSPACE/default.tfvars
+
+  # - name: Terraform Plan
+  #   shell: bash
+  #   run: |
+  #     set -a
+  #     source $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
+  #     set +a
+  #     terraform plan
