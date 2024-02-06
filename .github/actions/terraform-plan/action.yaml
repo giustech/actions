@@ -51,6 +51,10 @@ runs:
     shell: bash
     run: chmod -R +x .
 
+  - name: Print env file
+    shell: bash
+    run: cat $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
+
   - name: Terraform Plan
     shell: bash
     run: |
