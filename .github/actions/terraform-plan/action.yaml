@@ -57,4 +57,4 @@ runs:
     shell: bash
     run: |
       echo ${{ inputs.terraform_env_file }} >> default.tfvars
-      cat default.tfvars
+      terraform plan -var-file=default.tfvars
