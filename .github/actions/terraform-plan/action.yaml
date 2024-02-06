@@ -53,7 +53,7 @@ runs:
 
   - name: Print env file
     shell: bash
-    run: cat $GITHUB_WORKSPACE/.env
+    run: cat $GITHUB_WORKSPACE/default.tfvars
 
   - name: Terraform Plan
     shell: bash
