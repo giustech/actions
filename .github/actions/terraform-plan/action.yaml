@@ -25,10 +25,10 @@ inputs:
   terraform_bucket_name:
     description: 'Bucket Terraform'
     required: true
-  terraform_env_file:
+  terraform_vars_file:
     description: 'Bucket Terraform'
     required: true
-    default: .env
+    default: default.tfvars
 runs:
   using: composite
   steps:
@@ -53,9 +53,9 @@ runs:
 
   - name: Print env file
     shell: bash
-    run: cat $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
+    run: cat $GITHUB_WORKSPACE/${{ inputs.terraform_vars_file }}
 
-  - name: Terraform Plan
-    shell: bash
-    run: |
-      terraform plan
+  # - name: Terraform Plan
+  #   shell: bash
+  #   run: |
+  #     terraform plan
