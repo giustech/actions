@@ -53,19 +53,9 @@ runs:
     shell: bash
     run: chmod -R +x .
 
-  - name: Processa lista multilinha
-    run: |
-      echo ${{ inputs.terraform_env_file }}
+  - name: Terraform Plan
     shell: bash
-
-  # - name: Print env file
-  #   shell: bash
-  #   run: cat $GITHUB_WORKSPACE/default.tfvars
-
-  # - name: Terraform Plan
-  #   shell: bash
-  #   run: |
-  #     set -a
-  #     source $GITHUB_WORKSPACE/${{ inputs.terraform_env_file }}
-  #     set +a
-  #     terraform plan
+    run: |
+      
+      echo ${{ inputs.terraform_env_file }} >> default.tfvars
+      terraform plan -var-file=default.tfvars
