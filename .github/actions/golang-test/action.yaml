@@ -27,7 +27,7 @@ runs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ inputs.go-version }}
+          go-version: ${{ inputs.go_version }}
 
       - name: Clean mod cache
         shell: bash
