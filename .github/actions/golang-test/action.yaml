@@ -1,7 +1,7 @@
 name: 'Golang Testing'
 description: 'Golang Testing Applications'
 inputs:
-  go-version:
+  go_version:
     description: 'go version'
     required: true
     default: '^1.19'
@@ -11,13 +11,10 @@ inputs:
   token_endpoint_x_api_key:
     description: 'XApiKey to generate accesstoken'
     required: true
-  artifact_name:
-    description: 'Artifact builded name'
-    required: true
-  artifact_main_path:
-    description: 'Artifact main path'
-    required: true
   qodana_token:
+    description: 'Qodana Token Applications'
+    required: true
+  git_ref:
     description: 'Qodana Token Applications'
     required: true
 runs:
@@ -25,8 +22,8 @@ runs:
   steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
-          fetch-depth: 0  # a full history is required for pull request analysis
+          ref: ${{ inputs.git_ref }}
+          fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
