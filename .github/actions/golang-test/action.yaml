@@ -29,8 +29,57 @@ runs:
         with:
           go-version: ${{ inputs.go_version }}
 
+      - name: Clean mod cache
+        shell: bash
+        run: go clean --modcache
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Get Access Token
+        shell: bash
+        id: get-token
+        run: |
+          TOKEN=$(curl -X GET -H "Content-Type: application/json" -H "x-api-key: ${{ inputs.token_endpoint_x_api_key }}" ${{ inputs.token_endpoint }})
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Update Github token
+        shell: bash
+        run: |
+          git config --global url."https://x-access-token:${{ steps.get-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+          
+      - name: Tidy
+        shell: bash
+        run: go mod tidy
+
+      - name: Install dependencies
+        shell: bash
+        run: go mod tidy
+        env:
+          GO111MODULE: on
+          GOPROXY: direct
+          GOSUMDB: off
+
+
+      - name: Run unit tests and collect coverage
+        shell: bash
+        run: go test ./... -coverprofile=coverage.txt
+
+      - name: Upload coverage to a service
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.txt
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.3
+        with:
+          additional-parameters: '--set-parameter=coverageReport=coverage.txt'
         env:
           QODANA_TOKEN: ${{ inputs.qodana_token }}
