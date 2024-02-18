@@ -1,16 +1,6 @@
-name: 'Golang Testing'
-description: 'Golang Testing Applications'
+name: 'Code Testing'
+description: 'Code Testing Applications'
 inputs:
-  go_version:
-    description: 'go version'
-    required: true
-    default: '^1.19'
-  token_endpoint:
-    description: 'Endpoint to generate accesstoken'
-    required: true
-  token_endpoint_x_api_key:
-    description: 'XApiKey to generate accesstoken'
-    required: true
   qodana_token:
     description: 'Qodana Token Applications'
     required: true
