@@ -50,21 +50,6 @@ runs:
     run: |
       git config --global url."https://x-access-token:${{ steps.get-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
 
-  - name: Cache Terraform modules
-    uses: actions/cache@v4
-    with:
-      path: |
-        terraform/.terraform/modules
-        terraform/.terraform/providers
-      key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
-      restore-keys: |
-        ${{ runner.os }}-terraform-
-
-  - name: Terraform Key
-    shell: bash
-    run: |
-      echo "Key: ${{ inputs.terraform_state_file }}"
-
   - name: Terraform Init
     shell: bash
     run: |
