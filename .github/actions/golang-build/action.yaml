@@ -63,7 +63,7 @@ runs:
 
   - name: Building Api
     shell: bash
-    run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags lambda.norpc -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+    run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
   - name: Upload artifact
     uses: actions/upload-artifact@v4
