@@ -76,7 +76,7 @@ runs:
         with:
           name: coverage-report
           path: coverage.txt
-
+          retention-days: 2
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.3
         with:
