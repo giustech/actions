@@ -70,4 +70,4 @@ runs:
     with:
       name: ${{ inputs.artifact_name }}
       path: ${{ inputs.artifact_name }}
-      retention-days: 5
+      retention-days: 1

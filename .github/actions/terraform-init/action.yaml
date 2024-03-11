@@ -61,4 +61,4 @@ runs:
     with:
       name: terraform
       path: terraform
-      retention-days: 5
+      retention-days: 1
