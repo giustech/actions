@@ -32,8 +32,10 @@ inputs:
   check_changes:
     description: 'Get Code Plan'
     required: false
-    default: false
-
+  terraform_directory:
+    description: 'Directory containing Terraform files'
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -47,6 +49,11 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
+  - name: CD to Terraform directory
+    if: ${{ inputs.terraform_directory != '' }} # Executa apenas se terraform_directory não estiver vazio
+    shell: bash
+    run: |
+      cd ${{ inputs.terraform_directory }}
 
   - name: Set permissions for Terraform providers
     shell: bash
