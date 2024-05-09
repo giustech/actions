@@ -25,6 +25,10 @@ inputs:
   terraform_bucket_name:
     description: 'Bucket Terraform'
     required: true
+  terraform_directory:
+    description: 'Directory containing Terraform files'
+    required: false
+    default: '' # Set default value as empty string
 runs:
   using: composite
   steps:
@@ -50,10 +54,15 @@ runs:
     run: |
       git config --global url."https://x-access-token:${{ steps.get-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
 
+  - name: CD to Terraform directory
+    if: ${{ inputs.terraform_directory != '' }} # Executa apenas se terraform_directory não estiver vazio
+    shell: bash
+    run: |
+      cd ${{ inputs.terraform_directory }}
+
   - name: Terraform Init
     shell: bash
     run: |
-      cd terraform
       terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
   - name: Upload artifact
