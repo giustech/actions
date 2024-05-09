@@ -29,6 +29,11 @@ inputs:
     description: 'Bucket Terraform'
     required: true
     default: .env
+  check_changes:
+    description: 'Get Code Plan'
+    required: false
+    default: false
+
 runs:
   using: composite
   steps:
@@ -51,7 +56,19 @@ runs:
     shell: bash
     run: chmod -R +x .
 
+  - name: Check Has Changes
+    shell: bash
+    run: |
+      echo "has_change=$(terraform plan -no-color -detailed-exitcode)" >> $GITHUB_OUTPUT
+
   - name: Terraform Plan
     shell: bash
     run: |
-      terraform plan
+      terraform plan -no-color | tee changes.txt
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: changes.txt
+      path: changes.txt
+      retention-days: 1
