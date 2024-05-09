@@ -72,7 +72,7 @@ runs:
     uses: actions/upload-artifact@v4
     with:
       name: terraform
-      path: .
+      path: .terraform
       retention-days: 1
 
 
@@ -81,6 +81,6 @@ runs:
     uses: actions/upload-artifact@v4
     with:
       name: terraform
-      path: ${{ inputs.terraform_directory }}
+      path: ${{ inputs.terraform_directory }}/.terraform
       retention-days: 1
 
