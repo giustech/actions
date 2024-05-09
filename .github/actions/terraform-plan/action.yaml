@@ -69,6 +69,10 @@ runs:
     shell: bash
     run: chmod -R +x .
 
+  - name: Check files
+    shell: bash
+    run: ls -ltra
+
   - name: Check Has Changes
     shell: bash
     run: |
