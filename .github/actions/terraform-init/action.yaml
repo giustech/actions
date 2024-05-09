@@ -66,7 +66,6 @@ runs:
       terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
 
-
   - name: Upload artifact
     if: ${{ inputs.terraform_directory == '' }} # Executa apenas se terraform_directory não estiver vazio
     uses: actions/upload-artifact@v4

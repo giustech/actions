@@ -50,7 +50,7 @@ runs:
 
   - name: Set permissions for Terraform providers
     shell: bash
-    run: chmod -R +x
+    run: chmod -R +x .
 
   - name: Check files
     shell: bash
