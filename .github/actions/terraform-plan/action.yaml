@@ -32,15 +32,9 @@ inputs:
   check_changes:
     description: 'Get Code Plan'
     required: false
-  terraform_directory:
-    description: 'Directory containing Terraform files'
-    required: false
-    default: ''
 runs:
   using: composite
   steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
 
   - name: configure aws credentials
     uses: aws-actions/configure-aws-credentials@v4
@@ -49,25 +43,14 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
-  - name: CD to Terraform directory
-    if: ${{ inputs.terraform_directory != '' }} # Executa apenas se terraform_directory não estiver vazio
-    shell: bash
-    run: |
-      cd ${{ inputs.terraform_directory }}
-
-  - name: Set permissions for Terraform providers
-    shell: bash
-    run: mkdir -p .terraform
-
   - name: Download Artifact
     uses: actions/download-artifact@v4
     with:
       name: terraform
-      path: .terraform
 
   - name: Set permissions for Terraform providers
     shell: bash
-    run: chmod -R +x .terraform
+    run: chmod -R +x
 
   - name: Check files
     shell: bash
