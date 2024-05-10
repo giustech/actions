@@ -17,25 +17,12 @@ inputs:
     description: 'Aws region'
     required: true
     default: 'us-east-1'
-  token_endpoint:
-    description: 'Endpoint to generate accesstoken'
-    required: true
-  token_endpoint_x_api_key:
-    description: 'XApiKey to generate accesstoken'
-    required: true
-  terraform_state_file:
-    description: 'State file Terraform'
-    required: true
-  terraform_bucket_name:
-    description: 'Bucket Terraform'
-    required: true
-  terraform_env_file:
-    description: 'Bucket Terraform'
-    required: true
-    default: .env
-  check_changes:
-    description: 'Get Code Plan'
+  s3_upload_destiny: 
+    description: 'Bucket to Upload'
     required: false
+    default: ''
+
+
 runs:
   using: composite
   steps:
@@ -75,3 +62,8 @@ runs:
       name: changes.txt
       path: changes.txt
       retention-days: 1
+
+  - name: Upload to S3
+    if: ${{ inputs.s3_upload_destiny != '' }}
+    run: |
+      aws s3 cp changes.txt ${{ inputs.s3_upload_destiny }}.txt
