@@ -56,29 +56,27 @@ runs:
     shell: bash
     id: terraform_plan
     run: |
-      terraform plan -no-color -detailed-exitcode > terraform_plan.txt
-      has_change=$?
-      echo "has_change=$has_change" >> $GITHUB_OUTPUT
+      terraform plan -no-color -detailed-exitcode
 
-  - name: Set Output
-    shell: bash
-    run: |
-      if [ ${{ steps.terraform_plan.outputs.has_change }} -eq 0 ]; then
-        echo "No changes detected."
-        echo "has_change=false" >> $GITHUB_OUTPUT
-      else
-        echo "Changes detected."
-        echo "has_change=true" >> $GITHUB_OUTPUT
-      fi
+  # - name: Set Output
+  #   shell: bash
+  #   run: |
+  #     if [ ${{ steps.terraform_plan.outputs.has_change }} -eq 0 ]; then
+  #       echo "No changes detected."
+  #       echo "has_change=false" >> $GITHUB_OUTPUT
+  #     else
+  #       echo "Changes detected."
+  #       echo "has_change=true" >> $GITHUB_OUTPUT
+  #     fi
 
-  - name: Terraform Plan
-    shell: bash
-    run: |
-      terraform plan -no-color | tee changes.txt
+  # - name: Terraform Plan
+  #   shell: bash
+  #   run: |
+  #     terraform plan -no-color | tee changes.txt
 
-  - name: Upload artifact
-    uses: actions/upload-artifact@v4
-    with:
-      name: changes.txt
-      path: changes.txt
-      retention-days: 1
+  # - name: Upload artifact
+  #   uses: actions/upload-artifact@v4
+  #   with:
+  #     name: changes.txt
+  #     path: changes.txt
+  #     retention-days: 1
