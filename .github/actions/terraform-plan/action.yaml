@@ -53,10 +53,18 @@ runs:
     run: chmod -R +x .
 
   - name: Check Has Changes
-    shell: bash
     id: terraform_plan
+    shell: bash
     run: |
-      terraform plan -no-color -detailed-exitcode
+      terraform plan -no-color -detailed-exitcode || echo "Terraform plan failed"
+      echo "::set-output name=terraform_plan_exit_code::${PIPESTATUS[0]}"
+      echo "::set-output name=terraform_plan_output::$(terraform plan -no-color)"
+  
+  - name: Do something with Terraform plan output
+    shell: bash
+    run: |
+      echo "Terraform Plan Exit Code: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }}"
+      echo "Terraform Plan Output: ${{ steps.terraform_plan.outputs.terraform_plan_output }}"
 
   # - name: Set Output
   #   shell: bash
