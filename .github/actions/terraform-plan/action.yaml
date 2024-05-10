@@ -2,7 +2,7 @@ name: 'Terraform Plan'
 description: 'terraform plan commands'
 outputs:
   has_changes:
-    value: ${{ steps.terraform_plan_has_changes.outputs.has_changes }}
+    value: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
     description: 'Indica se houve alteração para plan'
 inputs:
   aws_account_number:
