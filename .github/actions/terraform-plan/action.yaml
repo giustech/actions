@@ -52,17 +52,13 @@ runs:
     shell: bash
     run: chmod -R +x .
 
-  - name: Check files
-    shell: bash
-    run: ls -ltra
-
   - name: Check Has Changes
     shell: bash
     id: terraform_plan
     run: |
       terraform plan -no-color -detailed-exitcode > terraform_plan.txt
       has_change=$?
-      echo "::set-output name=has_change::$has_change"
+      echo "has_change=$has_change" >> $GITHUB_OUTPUT
 
   - name: Set Output
     shell: bash
