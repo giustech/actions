@@ -56,6 +56,6 @@ runs:
     id: terraform_plan_has_changes
     shell: bash
     run: |
-      terraform plan -no-color -detailed-exitcode > result
+      terraform plan -no-color -detailed-exitcode > result || echo "Exit code: $?" >> result
       cat result
 
