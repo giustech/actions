@@ -59,6 +59,7 @@ runs:
       terraform plan -no-color -detailed-exitcode || echo "Terraform plan failed"
       echo "::set-output name=terraform_plan_exit_code::${PIPESTATUS[0]}"
       echo "terraform_has_changes=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+      echo "Terraform Plan Exit Code: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }}"
 
   - name: Do something with Terraform plan output
     if: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }} > 0
