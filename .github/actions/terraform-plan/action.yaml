@@ -53,22 +53,22 @@ runs:
     run: chmod -R +x .
 
   - name: Check Has Changes
-    id: terraform_plan
+    id: terraform_plan_has_changes
     shell: bash
     run: |
       terraform plan -no-color -detailed-exitcode || echo "Terraform plan failed"
-      echo "::set-output name=terraform_plan_exit_code::${PIPESTATUS[0]}"
+      echo "::set-output name=terraform_has_changes::${PIPESTATUS[0]}"
       echo "terraform_has_changes=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-      echo "Terraform Plan Exit Code: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }}"
+      echo "Terraform Plan Exit Code: ${PIPESTATUS[0]}"
 
   - name: Do something with Terraform plan output
-    if: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }} > 0
+    if: ${{ steps.terraform_plan_has_changes.outputs.terraform_has_changes }} > 0
     shell: bash
     run: |
       terraform plan -no-color | tee changes.txt
 
   - name: Upload artifact
-    if: ${{ steps.terraform_plan.outputs.terraform_plan_exit_code }} > 0
+    if: ${{ steps.terraform_plan_has_changes.outputs.terraform_has_changes }} > 0
     uses: actions/upload-artifact@v4
     with:
       name: changes.txt
