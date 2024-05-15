@@ -73,7 +73,7 @@ runs:
       name: terraform
       path: .
       retention-days: 1
-
+      recursive: true
 
   - name: Upload artifact
     if: ${{ inputs.terraform_directory != '' }} # Executa apenas se terraform_directory não estiver vazio
@@ -82,4 +82,4 @@ runs:
       name: terraform
       path: ${{ inputs.terraform_directory }}
       retention-days: 1
-
+      recursive: true
