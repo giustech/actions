@@ -13,15 +13,44 @@ on:
         required: true
         type: string
 
-
 jobs:
   create-repo:
     runs-on: ubuntu-latest
+    outputs:
+      repo_created: ${{ steps.set-output-created.outputs.repo_created }}
     steps:
-    - name: 'Create new repository using GitHub CLI'
-      id: creating-repository
-      env:
-        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: |
-        gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private
+      # 1. Verifica se o repositório já existe
+      - name: Check if repository exists
+        id: check-repo
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
+            echo "exists=true"  >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
+      # 2. Cria o repositório somente se ele ainda não existir
+      - name: Create new repository using GitHub CLI
+        id: creating-repository
+        if: steps.check-repo.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private
+
+      # 3. Define a saída indicando se o repositório foi criado
+      - name: Set output (repo_created)
+        id: set-output-created
+        run: |
+          if [ "${{ steps.check-repo.outputs.exists }}" = "false" ]; then
+            echo "repo_created=true"  >> $GITHUB_OUTPUT
+          else
+            echo "repo_created=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 4. Exibe se o repositório foi criado (true/false)
+      - name: Print repository creation status
+        run: |
+          echo "Repository created? -> ${{ steps.set-output-created.outputs.repo_created }}"
