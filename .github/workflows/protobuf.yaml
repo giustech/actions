@@ -31,10 +31,23 @@ jobs:
       run: |
         echo "Repository Created: ${{ steps.create-repo.outputs.created }}"
 
+  loading-workflows:
+    name: "Loading Workflows"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Load Workflows
+      run: |
+        ls -ltra
+        ls -ltra .github/workflows
+
+
   initialize:
     name: "Initialize Repository"
     runs-on: ubuntu-latest
-    needs: create
+    needs: [ create, loading-workflows ]
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
