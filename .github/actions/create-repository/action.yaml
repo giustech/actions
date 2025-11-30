@@ -14,8 +14,10 @@ runs:
     shell: bash
     run: |
       if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
+        echo "Repository already exists."
         echo "exists=true"  >> $GITHUB_OUTPUT
       else
+        echo "Repository does not exist."
         echo "exists=false" >> $GITHUB_OUTPUT
       fi
 
