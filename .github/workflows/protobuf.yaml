@@ -87,14 +87,17 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git repo
         cd repo
-        
         mkdir -p .github/workflows
         
-        echo ".idea" >> repo/.gitignore
-        echo ".vscode" >> repo/.gitignore
-        echo "target/" >> repo/.gitignore
-        echo "*.log" >> repo/.gitignore
-        echo "node_modules/" >> repo/.gitignore
+    - name: Create Gitignore
+      working-directory: repo
+      run: |
+        echo ".idea" >> .gitignore
+        echo ".vscode" >> .gitignore
+        echo "target/" >> .gitignore
+        echo "*.log" >> .gitignore
+        echo "node_modules/" >> .gitignore
+
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
@@ -105,6 +108,6 @@ jobs:
     - name: Commit Workflows to New Repository
       run: |
         cd repo
-        git add .github/workflows/
+        git add .gitignore .github/workflows/
         git commit -m "Workflows added"
         git push origin main
