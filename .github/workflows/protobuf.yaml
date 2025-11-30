@@ -14,17 +14,14 @@ on:
         type: string
 
 jobs:
-  create-repo:
-    runs-on: ubuntu-latest
-    steps:
-      generate-repository:
-        name: Java
-        uses: giustech/actions/.github/workflows/create-repository.yaml@main
-        permissions:
-          id-token: write
-          contents: read
-        secrets:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          language: 'java'
-          repository: '${{ github.event.repository.name }}-grpc-java'
+  generate-repository:
+    name: Java
+    uses: giustech/actions/.github/workflows/create-repository.yaml@main
+    permissions:
+      id-token: write
+      contents: read
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+    with:
+      language: 'java'
+      repository: '${{ github.event.repository.name }}-grpc-java'
