@@ -27,5 +27,4 @@ jobs:
         uses: ./.github/actions/create-repository
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
-          language: ${{ inputs.language }}
           repository: ${{ inputs.repository }}
