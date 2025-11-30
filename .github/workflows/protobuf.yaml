@@ -47,35 +47,9 @@ jobs:
       id: list-yaml
       run: |
         echo "Listing YAML files in .github/templates/java:"
-        shopt -s nullglob
         FILES=(github-actions/.github/templates/java/*.yaml)
-    
-        if [ ${#FILES[@]} -gt 0 ]; then
-          # Monta bloco nome + conteúdo
-          {
-            for f in "${FILES[@]}"; do
-              echo "===== $f ====="
-              cat "$f"
-              echo
-            done
-          } > /tmp/yaml_files_with_content.txt
-    
-          # Output só da lista de arquivos
-          echo "yaml_files<<EOF" >> "$GITHUB_OUTPUT"
-          printf "%s\n" "${FILES[@]}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-    
-          # Output com nome + conteúdo
-          echo "yaml_files_content<<EOF" >> "$GITHUB_OUTPUT"
-          cat /tmp/yaml_files_with_content.txt >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-    
-          # Log
-          cat /tmp/yaml_files_with_content.txt
-        else
-          echo "yaml_files=" >> "$GITHUB_OUTPUT"
-          echo "yaml_files_content=" >> "$GITHUB_OUTPUT"
-          echo "Nenhum arquivo encontrado."
+        if [ -e "${FILES[0]}" ]; then
+          printf "%s\n" "${FILES[@]}"
         fi
 
 
