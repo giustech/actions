@@ -71,7 +71,103 @@ jobs:
         name: generated-${{ inputs.language }}-actions
         path: generate-${{ inputs.language }}-actions
 
-  initialize:
+  generate-protobuf:
+    runs-on: ubuntu-latest
+    name: Protobuf
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+
+    - name: Generate Proto Folder
+      run: |
+        mkdir -p proto-stubs/${{ inputs.language }}
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      if: inputs.language == 'go'
+      with:
+        go-version: '1.21'
+
+    - name: Install Go Dependences
+      if: inputs.language == 'go'
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+    - name: Generate ${{ inputs.language }} Stubs
+      if: inputs.language == 'go'
+      run: |
+        protoc --proto_path=proto --go_out=proto-stubs/go --go-grpc_out=proto-stubs/go --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative $(find proto -name "*.proto" -type f)
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      if: inputs.language == 'java'
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install Java Dependencies
+      if: inputs.language == 'java'
+      run: |
+        wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe -O /tmp/protoc-gen-grpc-java
+        chmod +x /tmp/protoc-gen-grpc-java
+
+    - name: Generate ${{ inputs.language }} Stubs
+      if: inputs.language == 'java'
+      run: |
+        for proto_file in $(find proto -name "*.proto" -type f); do
+          protoc --proto_path=proto \
+          --java_out=proto-stubs/java \
+          --grpc-java_out=proto-stubs/java \
+          --plugin=protoc-gen-grpc-java=/tmp/protoc-gen-grpc-java \
+          "$proto_file"
+        done
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      if: inputs.language == 'python'
+      with:
+        python-version: '3.11'
+
+    - name: Install Python Dependencies
+      if: inputs.language == 'python'
+      run: |
+        pip install grpcio-tools
+
+    - name: Generate ${{ inputs.language }} Stubs
+      if: inputs.language == 'python'
+      run: |
+        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      if: inputs.language == 'javascript'
+      with:
+        node-version: '18'
+
+    - name: Install JavaScript Dependencies
+      if: inputs.language == 'javascript'
+      run: |
+        npm install -g grpc-tools
+
+    - name: Generate ${{ inputs.language }} Stubs
+      if: inputs.language == 'javascript'
+      run: |
+        grpc_tools_node_protoc --proto_path=proto --js_out=import_style=commonjs,binary:proto-stubs/javascript --grpc_out=grpc_js:proto-stubs/javascript $(find proto -name "*.proto" -type f)
+
+    - name: Upload Files
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 1
+        name: ${{ inputs.language }}-proto-stubs
+        path: proto-stubs/${{ inputs.language }}
+
+  commit:
     name: "Initialize Repository"
     runs-on: ubuntu-latest
     needs: [ create, loading-workflows ]
@@ -97,7 +193,6 @@ jobs:
         echo "target/" >> .gitignore
         echo "*.log" >> .gitignore
         echo "node_modules/" >> .gitignore
-
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
