@@ -55,9 +55,12 @@ jobs:
         if [ -e "${FILES[0]}" ]; then
           FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
           TIME_STAMP=$(date +%Y%m%d%H%M%S)
-          echo "# Generated in ${TIME_STAMP} " >> ${FILE_NAME}        
-          echo "# Hash: ${{ github.sha }} " >> ${FILE_NAME}        
-          echo "$(cat ${FILES[@]})" >> ${FILE_NAME} 
+          echo "Generating file: ${FILE_NAME}"
+        
+        
+          echo "# Generated in ${TIME_STAMP} " >> ./${FILE_NAME}        
+          echo "# Hash: ${{ github.sha }} " >> ./${FILE_NAME}        
+          echo "$(cat ${FILES[@]})" >> ./${FILE_NAME} 
         fi
         
 
