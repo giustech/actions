@@ -49,6 +49,7 @@ jobs:
         echo "Listing YAML files in .github/templates/java:"
         FILES=(github-actions/.github/templates/java/*.yaml)
         if [ -e "${FILES[0]}" ]; then
+          echo "${FILES[0]##github-actions/.github/templates/java/}"        
           printf "%s\n" "${FILES[@]}"
         fi
 
