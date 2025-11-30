@@ -59,7 +59,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/${{ inputs.repository }}
-          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Add default files
         run: |
