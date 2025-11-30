@@ -46,6 +46,7 @@ jobs:
     - name: List YAML Files
       id: list-yaml
       run: |
+        mkdir -p generate-actions
         echo "Listing YAML files in .github/templates/${{ inputs.language }}:"
         shopt -s nullglob
         FILES=(github-actions/.github/templates/${{ inputs.language }}/*.yaml)
@@ -56,20 +57,21 @@ jobs:
             FILE_NAME="${f##github-actions/.github/templates/${{ inputs.language }}/}"
             TIME_STAMP="$(date +%Y%m%d%H%M%S)"
     
-            echo "Creating file: ${FILE_NAME}"
             {
               echo "# Generated in ${TIME_STAMP}"
               echo "# Hash: ${{ github.sha }}"
               cat "$f"
-            } > "${FILE_NAME}"
-    
-            echo "=================================="
-            cat "${FILE_NAME}"
+            } > "generate-${{ inputs.language }}-actions/${FILE_NAME}"
           done
         else
           echo "Nenhum arquivo encontrado."
         fi
 
+    - name: Upload Generated Actions
+      uses: actions/upload-artifact@v3
+      with:
+        name: generated-${{ inputs.language }}-actions
+        path: generate-${{ inputs.language }}-actions
     # Create step to list every yaml file within .github/templates/java and retriver thier contant to a variable
 
   initialize:
