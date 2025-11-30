@@ -15,19 +15,19 @@ on:
 
 jobs:
   create-repo:
-    name: "Create Repository"
+    name: "Create Repository2"
     runs-on: ubuntu-latest
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
-    - name: Checkout Repository
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Create Repository
-      id: create-repo
-      env:
-        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-      uses: ./.github/actions/create-repository
-      with:
-        repository: ${{ inputs.repository }}
+#    - name: Create Repository
+#      id: create-repo
+#      env:
+#        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+#      uses: ./.github/actions/create-repository
+#      with:
+#        repository: ${{ inputs.repository }}
 
