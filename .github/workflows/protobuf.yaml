@@ -45,8 +45,15 @@ jobs:
       id: list-yaml
       run: |
         echo "Listing YAML files in .github/templates/java:"
-        FILES=$(ls github-actions/.github/templates/java/*.yaml)
-        echo "yaml_files=$FILES" >> $GITHUB_OUTPUT
+        FILES=(github-actions/.github/templates/java/*.yaml)
+        if [ -e "${FILES[0]}" ]; then
+          printf "%s\n" "${FILES[@]}" > /tmp/yaml_files.txt
+          echo "yaml_files<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/yaml_files.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "yaml_files=" >> $GITHUB_OUTPUT
+        fi
 
     - name: Show YAML File Contents
       run: |
