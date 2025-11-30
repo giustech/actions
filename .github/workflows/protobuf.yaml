@@ -41,6 +41,9 @@ jobs:
         path: 'github-actions'
         repository: '${{ github.repository_owner }}/actions'
 
+    - name: Create Repository
+      run: |
+        mkdir -p yaml-files
 
 
     - name: List YAML Files
@@ -63,7 +66,7 @@ jobs:
     - name: Upload Generated Workflows
       uses: actions/upload-artifact@v4
       with:
-        name: yaml-files
+        name: yaml-files-${{ inputs.language }}
         path: yaml-files
 
 
