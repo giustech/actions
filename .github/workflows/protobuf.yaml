@@ -257,23 +257,16 @@ jobs:
         name: generated-${{ inputs.language }}-proto
         path: repo
 
-
     - name: Commit Workflows to New Repository
+      working-directory: repo
       run: |
-        cd repo
-    
-        # Adiciona e faz commit apenas se houver mudanças
         git add -A
         if ! git diff --cached --quiet; then
           git commit -m "Workflows added"
         else
           echo "Sem alterações para commitar."
         fi
-    
-        # Atualiza referências
         git fetch origin
-    
-        # Troca para a branch delivery (cria se não existir)
         if git ls-remote --exit-code --heads origin delivery >/dev/null 2>&1; then
           git checkout delivery
           git pull --ff-only origin delivery
