@@ -13,40 +13,44 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Set up GH CLI authentication
+      shell: bash
+      run: gh auth login --with-token <<< "${{ inputs.pat_token }}"
 
-  - name: Create repository via GH CLI
-    shell: bash
-    run: |
-      gh repo create "${{ github.repository_owner }}/${{ inputs.repository }}" \
-        --private -y \
-        --description "Protobuf sources for ${{ inputs.language }}"
+    - name: Create repo on GitHub
+      shell: bash
+      run: |
+        gh repo create "${{ github.repository_owner }}/${{ inputs.repository }}" \
+          --private --description "Protobuf sources for ${{ inputs.language }}" --confirm
 
-  - name: Generate README
-    shell: bash
-    run: |
-      echo "# ${{ inputs.repository }}" > README.md
-      echo "" >> README.md
-      echo "Repositório contendo arquivos \`.proto\` de ${{ inputs.language }}." >> README.md
+    - name: Clone the new repository
+      shell: bash
+      run: |
+        git clone "https://github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git" new-repo
+        cd new-repo
 
-      echo ".idea" >> .gitignore
-      echo ".vscode" >> .gitignore
-      echo "node_modules/" >> .gitignore
-      echo "target" >> .gitignore
-      echo "dist" >> .gitignore
-      echo "build" >> .gitignore
-      echo "out" >> .gitignore
-      echo "proto-stubs" >> .gitignore
-      echo "**/.terraform" >> .gitignore
-      echo "**/.terraform.*" >> .gitignore
+        # Generate README
+        echo "# ${{ inputs.repository }}" > README.md
+        echo "" >> README.md
+        echo "Repositório contendo arquivos \`.proto\` de ${{ inputs.language }}." >> README.md
 
+        # Generate .gitignore
+        cat <<'EOF' > .gitignore
+        .idea
+        .vscode
+        node_modules/
+        target
+        dist
+        build
+        out
+        proto-stubs
+        **/.terraform
+        **/.terraform.*
+        EOF
 
-  - name: Push initial commit
-    shell: bash
-    run: |
-      git add README.md
-      git add .gitignore
-      git config user.email "action@github.com"
-      git config user.name "GitHub Action"
-      git commit -m "chore: initial commit with README"
-      git branch -M master
-      git push -u origin master
+        # Initial commit & push
+        git add README.md .gitignore
+        git config user.email "action@github.com"
+        git config user.name "GitHub Action"
+        git commit -m "chore: initial commit with README"
+        git push origin HEAD:master
