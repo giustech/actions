@@ -87,7 +87,14 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git repo
         cd repo
+        
         mkdir -p .github/workflows
+        
+        echo ".idea" >> repo/.gitignore
+        echo ".vscode" >> repo/.gitignore
+        echo "target/" >> repo/.gitignore
+        echo "*.log" >> repo/.gitignore
+        echo "node_modules/" >> repo/.gitignore
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
