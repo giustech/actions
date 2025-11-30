@@ -68,7 +68,7 @@ jobs:
         fi
 
     - name: Upload Generated Actions
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: generated-${{ inputs.language }}-actions
         path: generate-${{ inputs.language }}-actions
