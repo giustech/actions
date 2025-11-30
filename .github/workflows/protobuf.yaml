@@ -41,8 +41,6 @@ jobs:
         path: 'github-actions'
         repository: '${{ github.repository_owner }}/actions'
 
-
-
     - name: List YAML Files
       id: list-yaml
       run: |
@@ -72,7 +70,6 @@ jobs:
       with:
         name: generated-${{ inputs.language }}-actions
         path: generate-${{ inputs.language }}-actions
-    # Create step to list every yaml file within .github/templates/java and retriver thier contant to a variable
 
   initialize:
     name: "Initialize Repository"
@@ -84,8 +81,9 @@ jobs:
 
     - name: Create README File
 #      if: ${{ needs.create.outputs.created == 'true' && inputs.language == 'java' }}
-      uses: giustech/actions/.github/actions/generate-initial-files-java@main
+      uses: giustech/actions/.github/actions/generate-initial-files-${{ inputs.language }}@main
 
     - name: Show
       run: | 
         ls -ltra
+        cat README.md
