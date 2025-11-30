@@ -35,6 +35,9 @@ jobs:
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
+    - name: Show
+      run:
+        echo "${{ needs.create.outputs.created }}"
     - name: Create README File
       if: ${{ needs.create.outputs.created == 'true' }}
       run: |
