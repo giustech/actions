@@ -8,8 +8,6 @@ inputs:
 
 runs:
   using: composite
-  outputs:
-    created: ${{ steps.check-repo.outputs.exists == 'false' && steps.creating-repository.outputs.created == 'true' }}
   steps:
   - name: Check if repository exists
     id: check-repo

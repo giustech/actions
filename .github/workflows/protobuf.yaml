@@ -15,7 +15,7 @@ on:
 
 jobs:
   create-repo:
-    name: "Create Repository2"
+    name: "Create Repository"
     runs-on: ubuntu-latest
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
