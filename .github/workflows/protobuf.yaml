@@ -15,6 +15,7 @@ on:
 
 jobs:
   create-repo:
+    name: "Create Repository"
     runs-on: ubuntu-latest
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
@@ -30,6 +31,7 @@ jobs:
         pat_token: ${{ secrets.PAT_TOKEN }}
 
   init-files:
+    name: "Initialize Project Files"
     runs-on: ubuntu-latest
     needs: create-repo
     if: ${{ needs.create-repo.outputs.created == 'true' }}
