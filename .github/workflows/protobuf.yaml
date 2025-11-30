@@ -47,7 +47,6 @@ jobs:
 
 
     - name: List YAML Files
-      id: list-yaml
       working-directory: yaml-files
       run: |
         echo "Listing YAML files in .github/templates/java:"
