@@ -81,21 +81,23 @@ jobs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
 
-    - name: Commit Workflows to New Repository
+    - name: Clone Repository
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git
+        git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git repo
+        cd repo
         mkdir -p .github/workflows
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-          name: generated-${{ inputs.language }}-actions
-          path: .github/workflows
+        name: generated-${{ inputs.language }}-actions
+        path: repo/.github/workflows
 
     - name: Commit Workflows to New Repository
       run: |
+        cd repo
         git add .github/workflows/
         git commit -m "Workflows added"
         git push origin main
