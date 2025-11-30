@@ -15,7 +15,7 @@ on:
 
 jobs:
   generate-repository:
-    name: Java
+    name: Repository
     uses: giustech/actions/.github/workflows/create-repository.yaml@main
     permissions:
       id-token: write
@@ -23,5 +23,5 @@ jobs:
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
     with:
-      language: 'java'
-      repository: '${{ github.event.repository.name }}-grpc-java'
+      language: '${{ inputs.language }}'
+      repository: '${{ inputs.repository }}'
