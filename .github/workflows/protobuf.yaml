@@ -44,12 +44,10 @@ jobs:
     - name: Create README File
       if: ${{ needs.create.outputs.created == 'true' }}
       run: |
-        echo "# ${{ inputs.repository }}" >> README.md
-        echo "This repository is generated with Giustech Repository Generator Action." >> README.md
-
-    - name: Hello
-      if: ${{ needs.create.outputs.created == 'false' }}
-      run: |
-        echo "# ${{ inputs.repository }}123" >> README.md
-
-
+        CONTENT=$(echo "Exemplo de texto para o arquivo" | base64 -w0)
+        gh api --method PUT \
+          -H "Accept: application/vnd.github+json" \
+          /repos/<owner>/<repo>/contents/README.md \
+          -f message="feat: Creating Readme.md" \
+          -f content="$CONTENT" \
+          -f branch="main"
