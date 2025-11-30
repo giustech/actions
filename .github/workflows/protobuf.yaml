@@ -174,13 +174,28 @@ jobs:
     needs: [ create, generate-protobuf ]
     steps:
 
+    - name: Get Latest Tag
+      id: get-tag
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        LATEST_TAG=$(gh api repos/${{ github.repository_owner }}/${{ inputs.repository }}/tags --jq '.[0].name' 2>/dev/null || echo "")
+        
+        if [ -z "$LATEST_TAG" ]; then
+          echo "version=0.0.1" >> $GITHUB_OUTPUT
+        else
+          echo "version=$LATEST_TAG" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "Using version: ${LATEST_TAG:-0.0.1}"
+
     - name: Generate Java files
       if: inputs.language == 'java'
       uses: giustech/actions/.github/actions/generate-initial-files-java@main
       with:
         repository: ${{ inputs.repository }}
         application: ${{ inputs.repository }}
-        version: '1.0.0'
+        version: '${{ steps.get-tag.outputs.version }}'
 
     - name: Upload Initial Files
       uses: actions/upload-artifact@v4

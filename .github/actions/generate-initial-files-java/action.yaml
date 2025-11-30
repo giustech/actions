@@ -29,8 +29,6 @@ runs:
         <artifactId>${{ inputs.repository }}</artifactId>
         <packaging>jar</packaging>
         <version>${{ inputs.version }}</version>
-        <name>data-gateway-buffer-java</name>
-        <url>http://maven.apache.org</url>
       
         <properties>
           <protobuf.version>3.23.4</protobuf.version>
