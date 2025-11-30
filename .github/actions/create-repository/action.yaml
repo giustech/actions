@@ -43,12 +43,10 @@ runs:
   - name: Push initial commit
     shell: bash
     run: |
-      git init
       git add README.md
       git add .gitignore
       git config user.email "action@github.com"
       git config user.name "GitHub Action"
       git commit -m "chore: initial commit with README"
       git branch -M master
-      git remote add origin "https://x-access-token:${{ inputs.pat_token }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git"
       git push -u origin master
