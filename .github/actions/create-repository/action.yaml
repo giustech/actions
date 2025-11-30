@@ -26,6 +26,7 @@ runs:
         echo "exists=false" >> $GITHUB_OUTPUT
       fi
 
+
   - name: Create new repository using GitHub CLI
     id: creating-repository
     if: ${{ steps.check-repo.outputs.exists == 'false' }}
@@ -34,44 +35,13 @@ runs:
       echo "Creating new repository: ${{ inputs.repository }}"
       if gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private; then
         echo "created=true" >> $GITHUB_OUTPUT
+          set -e
+          content_b64=$(printf "# %s\n\nRepositório criado automaticamente.\n" "${{ inputs.repository }}" | base64 -w0)
+          gh api -X PUT "repos/${{ github.repository_owner }}/${{ inputs.repository }}/contents/README.md" \
+            -f message="chore: add README" \
+            -f content="$content_b64" \
+            -f branch="master"
       else
         echo "created=false" >> $GITHUB_OUTPUT
       fi
 
-
-  - name: Seed repository with README on master
-    if: ${{ steps.creating-repository.outputs.created == 'true' }}
-    shell: bash
-    env:
-      GH_TOKEN: ${{ inputs.token }}
-      PUSH_TOKEN: ${{ inputs.token }}
-    run: |
-      set -e
-      workdir="$(mktemp -d)"
-      git config --global user.name "${{ github.actor }}"
-      git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-      git -c init.defaultBranch=master init "$workdir"
-      cd "$workdir"
-      printf "# %s\n\nRepositório criado automaticamente.\n" "${{ inputs.repository }}" > README.md
-      git add README.md
-      git commit -m "chore: add README"
-      git remote add origin "https://x-access-token:${PUSH_TOKEN}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git"
-      n=0
-      until git push -u origin master; do
-        n=$((n+1))
-        if [ "$n" -ge 10 ]; then
-          echo "Falha ao dar push após $n tentativas."
-          exit 1
-        fi
-        echo "Push falhou; tentando novamente..."
-        sleep 2
-      done
-      rm -rf "$workdir"
-
-  - name: Set default branch to master
-    if: ${{ steps.creating-repository.outputs.created == 'true' }}
-    shell: bash
-    env:
-      GH_TOKEN: ${{ inputs.token }}
-    run: |
-      gh repo edit ${{ github.repository_owner }}/${{ inputs.repository }} --default-branch master || true
