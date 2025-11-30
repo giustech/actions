@@ -54,7 +54,7 @@ jobs:
         FILES=(github-actions/.github/templates/java/*.yaml)
         if [ -e "${FILES[0]}" ]; then
           FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
-          print("Generating file: ${FILE_NAME}")
+          echo "Generating file: $FILE_NAME"
         fi
         
 
