@@ -30,6 +30,7 @@ jobs:
     - name: Show Output
       run: |
         echo "Repository Created: ${{ steps.create-repo.outputs.created }}"
+
   initialize:
     name: "Initialize Repository"
     runs-on: ubuntu-latest

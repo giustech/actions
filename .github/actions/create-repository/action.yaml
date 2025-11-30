@@ -10,9 +10,6 @@ outputs:
   created:
     description: "Whether the repository was created"
     value: ${{ steps.creating-repository.outputs.created }}
-  exists:
-    description: "Whether the repository already exists"
-    value: ${{ steps.check-repo.outputs.exists }}
 
 runs:
   using: composite
@@ -29,11 +26,21 @@ runs:
         echo "exists=false" >> $GITHUB_OUTPUT
       fi
 
+  - name: Repository Created
+    id: creating-repository
+    if: ${{ steps.check-repo.outputs.exists == 'true' }}
+    shell: bash
+    run: |
+      echo "Repository already exists. Skipping creation."
+      echo "created=false" >> $GITHUB_OUTPUT
+
+
   - name: Create new repository using GitHub CLI
     id: creating-repository
     if: ${{ steps.check-repo.outputs.exists == 'false' }}
     shell: bash
     run: |
+      echo "Creating new repository: ${{ inputs.repository }}"
       if gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private; then
         echo "created=true" >> $GITHUB_OUTPUT
       else
