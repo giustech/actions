@@ -173,12 +173,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ create, generate-protobuf ]
     steps:
+
     - name: Generate Java files
       if: inputs.language == 'java'
       uses: giustech/actions/.github/actions/generate-initial-files-java@main
       with:
         repository: ${{ inputs.repository }}
         application: ${{ inputs.repository }}
+        version: '1.0.0'
 
   commit:
     name: "Commit Repository"
