@@ -1,0 +1,48 @@
+name: Create Git Repository
+
+on:
+  workflow_call:
+    secrets:
+      PAT_TOKEN:
+        required: true
+    inputs:
+      repository:
+        required: true
+        type: string
+      language:
+        required: true
+        type: string
+
+env:
+  GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+jobs:
+  verify:
+    name: "Verify"
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check-repo.outputs.exists }}
+    steps:
+      - name: Check if repository exists
+        id: check-repo
+        run: |
+          if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
+            echo "exists=true"  >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+  create:
+    name: "Create"
+    runs-on: ubuntu-latest
+    if : ${{ needs.verify.outputs.exists == 'false' }}
+    outputs:
+      exists: ${{ needs.verify.outputs.exists == 'false' }}
+    needs: verify
+    steps:
+      - name: Create new repository using GitHub CLI
+        id: creating-repository
+        run: |
+          gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private
+  
+
