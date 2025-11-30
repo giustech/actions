@@ -13,26 +13,23 @@ runs:
   - name: Create README File
     shell: bash
     run: |
-      
-      cat > README.md <<EOF
-
-      <<README
+      cat > README.md <<'EOF'
       # ${{ inputs.application }} - Protobuf Connector
-
+  
       Este repositório contém as classes Java geradas (stubs) a partir das definições Protobuf (`.proto`) da **[Sua Aplicação Principal]**.
-
+  
       Esta biblioteca atua como um conector oficial, garantindo que serviços consumidores utilizem os contratos de dados e clientes gRPC corretos e atualizados.
-
+  
       ---
-
+  
       ## 📦 Instalação
-
+  
       Configure o seu gerenciador de dependências conforme abaixo.
-
+  
       ### 🐘 Gradle (build.gradle)
-
+  
       Adicione o repositório e a dependência no seu arquivo `build.gradle`:
-
+  
       ```groovy
       repositories {
           mavenCentral()
@@ -45,17 +42,18 @@ runs:
               }
           }
       }
-
+  
       dependencies {
           // Conector da Aplicação
-          implementation 'com.giustech:${{inputs.repository}}:x.x.x'
-
+          implementation 'com.giustech:${{ inputs.repository }}:x.x.x'
+  
           // Dependências transitivas do gRPC (caso necessário)
           implementation 'io.grpc:grpc-protobuf:1.58.0'
           implementation 'io.grpc:grpc-stub:1.58.0'
       }
-
+      ```
       EOF
+
 
   - name: Create folders
     shell: bash
