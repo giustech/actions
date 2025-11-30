@@ -37,11 +37,17 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        path: 'github-actions'
+        repository: '${{ github.repository_owner }}/actions'
 
     - name: Load Workflows
+      working-directory: 'github-actions'
       run: |
         ls -ltra
         ls -ltra .github/workflows
+
+
 
 
   initialize:
