@@ -183,7 +183,6 @@ jobs:
         version: '1.0.0'
 
     - name: Upload Initial Files
-      shell: bash
       uses: actions/upload-artifact@v4
       with:
         path: .
