@@ -1,0 +1,31 @@
+name: Generate Repository
+
+on:
+  workflow_call:
+    secrets:
+      PAT_TOKEN:
+        required: true
+    inputs:
+      repository:
+        required: true
+        type: string
+      language:
+        required: true
+        type: string
+
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Repository
+        uses: ./.github/actions/create-repository
+        with:
+          pat_token: ${{ secrets.PAT_TOKEN }}
+          language: ${{ inputs.language }}
+          repository: ${{ inputs.repository }}

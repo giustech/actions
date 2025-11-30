@@ -1,0 +1,54 @@
+name: Create Repository
+inputs:
+  language:
+    description: 'Programming language of the repository'
+    required: true
+  repository:
+    description: 'Name of the repository to be created'
+    required: true
+  pat_token:
+    description: 'Secret token with permissions to create repositories'
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+  - name: Create repository via GH CLI
+    shell: bash
+    run: |
+      gh repo create "${{ github.repository_owner }}/${{ inputs.repository }}" \
+        --private -y \
+        --description "Protobuf sources for ${{ inputs.language }}"
+
+  - name: Generate README
+    shell: bash
+    run: |
+      echo "# ${{ inputs.repository }}" > README.md
+      echo "" >> README.md
+      echo "Repositório contendo arquivos \`.proto\` de ${{ inputs.language }}." >> README.md
+
+      echo ".idea" >> .gitignore
+      echo ".vscode" >> .gitignore
+      echo "node_modules/" >> .gitignore
+      echo "target" >> .gitignore
+      echo "dist" >> .gitignore
+      echo "build" >> .gitignore
+      echo "out" >> .gitignore
+      echo "proto-stubs" >> .gitignore
+      echo "**/.terraform" >> .gitignore
+      echo "**/.terraform.*" >> .gitignore
+
+
+  - name: Push initial commit
+    shell: bash
+    run: |
+      git init
+      git add README.md
+      git add .gitignore
+      git config user.email "action@github.com"
+      git config user.name "GitHub Action"
+      git commit -m "chore: initial commit with README"
+      git branch -M master
+      git remote add origin "https://x-access-token:${{ inputs.pat_token }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git"
+      git push -u origin master
