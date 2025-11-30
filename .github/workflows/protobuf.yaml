@@ -227,6 +227,10 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git repo
         cd repo
+
+    - name: Clean Repository
+      working-directory: repo
+      run: |
         rm -rf .
         mkdir -p .github/workflows
 
