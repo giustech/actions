@@ -167,10 +167,23 @@ jobs:
         name: ${{ inputs.language }}-proto-stubs
         path: proto-stubs/${{ inputs.language }}
 
-  commit:
-    name: "Initialize Repository"
+
+  prepare-repository:
+    name: "Prepare Repository"
     runs-on: ubuntu-latest
-    needs: [ create, loading-workflows ]
+    needs: [ create, generate-protobuf ]
+    steps:
+    - name: Generate Java files
+      if: inputs.language == 'java'
+      uses: giustech/actions/.github/actions/generate-initial-files-java@main
+      with:
+        repository: ${{ inputs.repository }}
+        application: ${{ inputs.repository }}
+
+  commit:
+    name: "Commit Repository"
+    runs-on: ubuntu-latest
+    needs: [ create, loading-workflows, prepare-repository ]
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
     outputs:
