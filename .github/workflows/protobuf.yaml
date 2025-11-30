@@ -58,10 +58,14 @@ jobs:
           echo "# Generated in ${TIME_STAMP} " >> ${FILE_NAME}        
           echo "# Hash: ${{ github.sha }} " >> ${FILE_NAME}        
           echo "$(cat ${FILES[@]})" >> ${FILE_NAME} 
-        
-          echo "=================================="
-          cat ${FILE_NAME}
         fi
+        
+
+    - name: Check files
+      working-directory: yaml-files
+      run: |
+        ls -ltra
+
 
     - name: Upload Generated Workflows
       uses: actions/upload-artifact@v4
