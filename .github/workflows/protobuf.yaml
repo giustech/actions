@@ -41,21 +41,7 @@ jobs:
         path: 'github-actions'
         repository: '${{ github.repository_owner }}/actions'
 
-    - name: Create Repository
-      run: |
-        mkdir -p yaml-files
 
-
-    - name: List YAML Files
-      working-directory: yaml-files
-      run: |
-        echo "Listing YAML files in .github/templates/java:"
-        FILES=(github-actions/.github/templates/java/*.yaml)
-        if [ -e "${FILES[0]}" ]; then
-          FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
-          echo "Generating file: $FILE_NAME"
-        fi
-        
 
     - name: List YAML Files
       id: list-yaml
@@ -66,26 +52,13 @@ jobs:
         if [ -e "${FILES[0]}" ]; then
           FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
           TIME_STAMP=$(date +%Y%m%d%H%M%S)
-          echo "Generating file: ${FILE_NAME}"
+          echo "# Generated in ${TIME_STAMP} " >> ${FILE_NAME}        
+          echo "# Hash: ${{ github.sha }} " >> ${FILE_NAME}        
+          echo "$(cat ${FILES[@]})" >> ${FILE_NAME} 
         
-        
-          echo "# Generated in ${TIME_STAMP} " >> ./${FILE_NAME}        
-          echo "# Hash: ${{ github.sha }} " >> ./${FILE_NAME}        
-          echo "$(cat ${FILES[@]})" >> ./${FILE_NAME} 
+          echo "=================================="
+          cat ${FILE_NAME}
         fi
-        
-
-    - name: Check files
-      working-directory: yaml-files
-      run: |
-        ls -ltra
-
-
-    - name: Upload Generated Workflows
-      uses: actions/upload-artifact@v4
-      with:
-        name: yaml-files-${{ inputs.language }}
-        path: yaml-files
 
 
 
