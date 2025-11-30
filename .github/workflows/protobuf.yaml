@@ -25,6 +25,8 @@ jobs:
 
     - name: Create Repository
       id: create-repo
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       uses: ./.github/actions/create-repository
       with:
         repository: ${{ inputs.repository }}
