@@ -1,35 +1,22 @@
 name: Create Repository
-description: 'Creates a new private repository'
+description: Creates a new GitHub repository
 
 inputs:
   repository:
-    description: "Name of the repository to be created"
+    description: Repository name to create
     required: true
+
+outputs:
+  created:
+    description: Repository created successfully
+    value: ${{ steps.create.outputs.created }}
 
 runs:
   using: composite
-  outputs:
-    created: ${{ steps.check-repo.outputs.exists == 'false' && steps.creating-repository.outputs.created == 'true' }}
   steps:
-
-    - name: Check if repository exists
-      id: check-repo
+    - name: Create repository
+      id: create
       shell: bash
       run: |
-        if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
-          echo "exists=true"  >> $GITHUB_OUTPUT
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Create new repository using GitHub CLI
-      id: creating-repository
-      if: ${{ steps.check-repo.outputs.exists == 'false' }}
-      shell: bash
-      run: |
-        if gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private; then
-          echo "created=true" >> $GITHUB_OUTPUT
-        else
-          echo "created=false" >> $GITHUB_OUTPUT
-        fi
-
+        gh repo create "${{ inputs.repository }}" --private -y
+        echo "created=true" >> $GITHUB_OUTPUT
