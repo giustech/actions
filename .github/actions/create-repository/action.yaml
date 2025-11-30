@@ -1,40 +1,58 @@
 name: Create Repository
 inputs:
   language:
-    description: 'Programming language of the repository'
+    description: "Programming language of the repository"
     required: true
   repository:
-    description: 'Name of the repository to be created'
+    description: "Name of the repository to be created"
     required: true
   pat_token:
-    description: 'Secret token with permissions to create repositories'
+    description: "Secret token with permissions to create repositories"
     required: true
 
 runs:
   using: composite
   steps:
-    - name: Set up GH CLI authentication
-      shell: bash
-      run: gh auth login --with-token <<< "${{ inputs.pat_token }}"
-
-    - name: Create repo on GitHub
+    # 1. Autentica o GH CLI
+    - name: Authenticate GH CLI
       shell: bash
       run: |
-        gh repo create "${{ github.repository_owner }}/${{ inputs.repository }}" \
-          --private --description "Protobuf sources for ${{ inputs.language }}" --confirm
+        gh auth logout --hostname github.com || true
+        gh auth login --hostname github.com --with-token <<< "${{ inputs.pat_token }}"
 
-    - name: Clone the new repository
+    # 2. Verifica se o repo já existe; cria apenas se necessário
+    - name: Ensure repository exists
       shell: bash
       run: |
-        git clone "https://github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git" new-repo
+        set -euo pipefail
+        REPO_FULL="${{ github.repository_owner }}/${{ inputs.repository }}"
+
+        if gh repo view "$REPO_FULL" >/dev/null 2>&1; then
+          echo "Repository $REPO_FULL already exists; skipping creation."
+        else
+          echo "Creating repository $REPO_FULL..."
+          gh repo create "$REPO_FULL" \
+            --private \
+            --description "Protobuf sources for ${{ inputs.language }}" \
+            --confirm
+        fi
+
+    # 3. Clona em diretório limpo, gera arquivos e faz o push para master
+    - name: Populate repository (README, .gitignore) and push to master
+      shell: bash
+      run: |
+        set -euo pipefail
+        REPO_FULL="${{ github.repository_owner }}/${{ inputs.repository }}"
+
+        git clone "https://github.com/$REPO_FULL.git" new-repo
         cd new-repo
 
-        # Generate README
+        # 3.1 Gera README
         echo "# ${{ inputs.repository }}" > README.md
         echo "" >> README.md
         echo "Repositório contendo arquivos \`.proto\` de ${{ inputs.language }}." >> README.md
 
-        # Generate .gitignore
+        # 3.2 Gera .gitignore
         cat <<'EOF' > .gitignore
         .idea
         .vscode
@@ -48,9 +66,16 @@ runs:
         **/.terraform.*
         EOF
 
-        # Initial commit & push
-        git add README.md .gitignore
-        git config user.email "action@github.com"
-        git config user.name "GitHub Action"
-        git commit -m "chore: initial commit with README"
-        git push origin HEAD:master
+        # 3.3 Caso ainda não exista histórico, cria commit e envia para master
+        if [ -z "$(git ls-remote --heads origin master)" ]; then
+          git add README.md .gitignore
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git commit -m "chore: initial commit with README"
+          git push origin HEAD:master
+        else
+          echo "Branch master já possui commits; nenhum push necessário."
+        fi
+
+        # 3.4 Ajusta default branch para master
+        gh api -X PATCH "repos/$REPO_FULL" -f default_branch=master
