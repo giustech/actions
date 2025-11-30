@@ -19,7 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 'Create new repository using GitHub CLI'
+      id: creating-repository
       env:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private
+
