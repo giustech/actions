@@ -11,10 +11,10 @@ inputs:
     required: false
     default: "1.0.0"
 
-
 runs:
   using: composite
   steps:
+
   - name: Generate Pom
     shell: bash
     run: |
@@ -146,6 +146,8 @@ runs:
       
       </project>
       EOF
+      
+
   - name: Create README File
     shell: bash
     run: |
@@ -197,10 +199,3 @@ runs:
       mkdir -p .github/worfklows
       mkdir -p src/main/java
 
-
-  - name: Upload Initial Files
-    shell: bash
-    uses: actions/upload-artifact@v4
-    with:
-      path: .
-      name: initial-files-java

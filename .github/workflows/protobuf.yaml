@@ -182,6 +182,15 @@ jobs:
         application: ${{ inputs.repository }}
         version: '1.0.0'
 
+    - name: Upload Initial Files
+      shell: bash
+      uses: actions/upload-artifact@v4
+      with:
+        path: .
+        name: initial-files-java
+
+
+
   commit:
     name: "Commit Repository"
     runs-on: ubuntu-latest
