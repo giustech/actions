@@ -46,23 +46,29 @@ jobs:
     - name: List YAML Files
       id: list-yaml
       run: |
-        echo "Listing YAML files in .github/templates/java:"
-        FILES=(github-actions/.github/templates/java/*.yaml)
-        if [ -e "${FILES[0]}" ]; then
-        
-          FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
-          TIME_STAMP=$(date +%Y%m%d%H%M%S)
-          echo "Creatring file: ${FILE_NAME}"
-          echo "# Generated in ${TIME_STAMP} " >> ${FILE_NAME}        
-          echo "# Hash: ${{ github.sha }} " >> ${FILE_NAME}        
-          echo "$(cat ${FILES[@]})" >> ${FILE_NAME} 
-        
-          echo "=================================="
-          cat ${FILE_NAME}
+        echo "Listing YAML files in .github/templates/${{ inputs.language }}:"
+        shopt -s nullglob
+        FILES=(github-actions/.github/templates/${{ inputs.language }}/*.yaml)
+        echo "Files: ${FILES[@]}"
+    
+        if [ ${#FILES[@]} -gt 0 ]; then
+          for f in "${FILES[@]}"; do
+            FILE_NAME="${f##github-actions/.github/templates/${{ inputs.language }}/}"
+            TIME_STAMP="$(date +%Y%m%d%H%M%S)"
+    
+            echo "Creating file: ${FILE_NAME}"
+            {
+              echo "# Generated in ${TIME_STAMP}"
+              echo "# Hash: ${{ github.sha }}"
+              cat "$f"
+            } > "${FILE_NAME}"
+    
+            echo "=================================="
+            cat "${FILE_NAME}"
+          done
+        else
+          echo "Nenhum arquivo encontrado."
         fi
-
-
-
 
     # Create step to list every yaml file within .github/templates/java and retriver thier contant to a variable
 
