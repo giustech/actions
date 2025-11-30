@@ -49,8 +49,14 @@ jobs:
         echo "Listing YAML files in .github/templates/java:"
         FILES=(github-actions/.github/templates/java/*.yaml)
         if [ -e "${FILES[0]}" ]; then
-          echo "${FILES[0]##github-actions/.github/templates/java/}"        
-          printf "%s\n" "${FILES[@]}"
+          FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
+          TIME_STAMP=$(date +%Y%m%d%H%M%S)
+          echo "# Generated in ${TIME_STAMP} " >> ${FILE_NAME}        
+          echo "# Hash: ${{ github.sha }} " >> ${FILE_NAME}        
+          echo "$(cat ${FILES[@]})" >> ${FILE_NAME} 
+        
+          echo "=================================="
+          cat ${FILE_NAME}
         fi
 
 
