@@ -41,14 +41,24 @@ jobs:
         path: 'github-actions'
         repository: '${{ github.repository_owner }}/actions'
 
-    - name: Load Workflows
-      working-directory: 'github-actions'
+    - name: List YAML Files
+      id: list-yaml
       run: |
-        ls -ltra
-        ls -ltra .github/workflows
+        echo "Listing YAML files in .github/templates/java:"
+        FILES=$(ls github-actions/.github/templates/java/*.yaml)
+        echo "yaml_files=$FILES" >> $GITHUB_OUTPUT
+
+    - name: Show YAML File Contents
+      run: |
+        for FILE in ${{ steps.list-yaml.outputs.yaml_files }}; do
+          echo "Contents of $FILE:"
+          cat "$FILE"
+          echo "-----------------------------------"
+        done
 
 
 
+    # Create step to list every yaml file within .github/templates/java and retriver thier contant to a variable
 
   initialize:
     name: "Initialize Repository"

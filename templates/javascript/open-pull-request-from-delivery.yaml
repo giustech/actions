@@ -1,0 +1,7 @@
+name: Open Pull Request from Delivery
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
