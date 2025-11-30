@@ -54,6 +54,18 @@ jobs:
         FILES=(github-actions/.github/templates/java/*.yaml)
         if [ -e "${FILES[0]}" ]; then
           FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
+          print("Generating file: ${FILE_NAME}")
+        fi
+        
+
+    - name: List YAML Files
+      id: list-yaml
+      working-directory: yaml-files
+      run: |
+        echo "Listing YAML files in .github/templates/java:"
+        FILES=(github-actions/.github/templates/java/*.yaml)
+        if [ -e "${FILES[0]}" ]; then
+          FILE_NAME=${FILES[0]##github-actions/.github/templates/java/}
           TIME_STAMP=$(date +%Y%m%d%H%M%S)
           echo "Generating file: ${FILE_NAME}"
         
