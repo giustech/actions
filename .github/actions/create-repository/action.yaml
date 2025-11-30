@@ -27,7 +27,7 @@ runs:
       fi
 
   - name: Repository Created
-    id: creating-repository
+    id: skip-creation
     if: ${{ steps.check-repo.outputs.exists == 'true' }}
     shell: bash
     run: |
