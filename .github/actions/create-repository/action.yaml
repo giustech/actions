@@ -6,6 +6,14 @@ inputs:
     description: "Name of the repository to be created"
     required: true
 
+outputs:
+  created:
+    description: "Whether the repository was created"
+    value: ${{ steps.creating-repository.outputs.created }}
+  exists:
+    description: "Whether the repository already exists"
+    value: ${{ steps.check-repo.outputs.exists }}
+
 runs:
   using: composite
   steps:

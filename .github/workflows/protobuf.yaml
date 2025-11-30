@@ -27,7 +27,9 @@ jobs:
       uses: giustech/actions/.github/actions/create-repository@main
       with:
         repository: ${{ inputs.repository }}
-
+    - name: Show Output
+      run: |
+        echo "Repository Created: ${{ steps.create-repo.outputs.created }}"
   initialize:
     name: "Initialize Repository"
     runs-on: ubuntu-latest
