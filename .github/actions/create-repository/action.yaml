@@ -26,15 +26,6 @@ runs:
         echo "exists=false" >> $GITHUB_OUTPUT
       fi
 
-  - name: Repository Created
-    id: skip-creation
-    if: ${{ steps.check-repo.outputs.exists == 'true' }}
-    shell: bash
-    run: |
-      echo "Repository already exists. Skipping creation."
-      echo "created=false" >> $GITHUB_OUTPUT
-
-
   - name: Create new repository using GitHub CLI
     id: creating-repository
     if: ${{ steps.check-repo.outputs.exists == 'false' }}
