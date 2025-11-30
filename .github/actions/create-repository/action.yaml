@@ -22,9 +22,18 @@ runs:
         GH_TOKEN: ${{ inputs.pat_token }}
         REPO_NAME: ${{ inputs.repository }}
       run: |
-        gh repo create $REPO_NAME --private --with-readme --default-branch master
-        echo "Repository created successfully!"
-        echo "Access it at: https://github.com/${{ github.repository_owner }}/$REPO_NAME"
+        # Criamos um diretório temporário e navegamos para dentro dele.
+        # Isso evita o erro "remote origin already exists", pois executamos o comando
+        # em um diretório limpo, que ainda não é um repositório Git.
+        mkdir temp_dir
+        cd temp_dir
+
+        # Agora, executamos o comando de criação.
+        # Usamos o nome completo (OWNER/REPO) para sermos mais explícitos.
+        gh repo create ${{ github.repository_owner }}/$REPO_NAME --private --with-readme --default-branch master
+
+        echo "Repositório criado com sucesso!"
+        echo "Acesse em: https://github.com/${{ github.repository_owner }}/$REPO_NAME"
 
     - name: 'Output repository URL'
       shell: bash

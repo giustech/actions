@@ -1,0 +1,185 @@
+# 📊 Relatório de Escaneamento de Diretório
+
+**Data de Geração:** 30/11/2025 06:44:50  
+**Diretório Base:** `.`  
+
+## ⚙️ Configurações Utilizadas
+
+- **Pastas Ignoradas:** Nenhuma
+- **Extensões Ignoradas:** Nenhuma
+- **Arquivo de Saída:** `result.md`
+
+## 📁 Arquivos Encontrados
+
+**5 Arquivos**  
+**3 Pastas**
+
+### 📈 Resumo por Extensão
+
+| Extensão | Quantidade | Tamanho Total |
+|----------|------------|---------------|
+| `.yaml` | 5 | 2.5 KB |
+
+**Tamanho Total:** 2.5 KB
+
+### 📋 Lista Detalhada
+
+#### 📂 Pasta `./actions/create-repository`
+
+**1. action.yaml**
+
+- 📍 **Caminho:** `actions/create-repository/action.yaml`
+- 📏 **Tamanho:** 1.0 KB
+
+```yaml
+name: Create Repository
+description: 'Creates a new private repository with a master default branch and a README file.'
+
+inputs:
+  repository:
+    description: "Name of the repository to be created"
+    required: true
+  pat_token:
+    description: "Secret token with permissions to create repositories"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: 'Log repository name'
+      shell: bash
+      run: echo "Creating repository ${{ inputs.repository }}..."
+
+    - name: 'Create new repository using GitHub CLI'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.pat_token }}
+        REPO_NAME: ${{ inputs.repository }}
+      run: |
+        gh repo create $REPO_NAME --private --with-readme --default-branch master
+        echo "Repository created successfully!"
+        echo "Access it at: https://github.com/${{ github.repository_owner }}/$REPO_NAME"
+
+    - name: 'Output repository URL'
+      shell: bash
+      run: echo "Repository URL: https://github.com/${{ github.repository_owner }}/${{ inputs.repository }}"
+```
+
+#### 📂 Pasta `./templates/java`
+
+**1. open-pull-request-from-delivery.yaml**
+
+- 📍 **Caminho:** `templates/java/open-pull-request-from-delivery.yaml`
+- 📏 **Tamanho:** 139.0 B
+
+```yaml
+name: Open Pull Request from Delivery
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+```
+
+**2. push-on-delivery.yaml**
+
+- 📍 **Caminho:** `templates/java/push-on-delivery.yaml`
+- 📏 **Tamanho:** 667.0 B
+
+```yaml
+name: Push to Delivery
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - 'src/**'
+    branches:
+      - delivery
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Validate Maven project
+        run: mvn validate
+
+      - name: Compile code
+        run: mvn clean compile
+
+      - name: Verify build
+        run: mvn verify
+```
+
+**3. push-on-master.yaml**
+
+- 📍 **Caminho:** `templates/java/push-on-master.yaml`
+- 📏 **Tamanho:** 122.0 B
+
+```yaml
+name: Push to Master
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+```
+
+#### 📂 Pasta `./workflows`
+
+**1. protobuf.yaml**
+
+- 📍 **Caminho:** `workflows/protobuf.yaml`
+- 📏 **Tamanho:** 593.0 B
+
+```yaml
+name: Generate Repository
+
+on:
+  workflow_call:
+    secrets:
+      PAT_TOKEN:
+        required: true
+    inputs:
+      repository:
+        required: true
+        type: string
+      language:
+        required: true
+        type: string
+
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Repository
+        uses: ./.github/actions/create-repository
+        with:
+          pat_token: ${{ secrets.PAT_TOKEN }}
+          repository: ${{ inputs.repository }}
+```
+
