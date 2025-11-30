@@ -231,7 +231,7 @@ jobs:
     - name: Clean Repository
       working-directory: repo
       run: |
-        rm -rf .
+        rm -rf 
         mkdir -p .github/workflows
 
     - name: Create Gitignore
