@@ -30,7 +30,6 @@ jobs:
       uses: ./.github/actions/create-repository
       with:
         repository: ${{ inputs.repository }}
-        pat_token: ${{ secrets.PAT_TOKEN }}
 
   init-files:
     name: "Initialize Project Files"

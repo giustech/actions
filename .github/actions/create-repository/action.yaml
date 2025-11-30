@@ -1,15 +1,10 @@
 name: Create Repository
-description: 'Creates a new private repository with a master default branch and a README file.'
+description: 'Creates a new private repository'
 
 inputs:
   repository:
     description: "Name of the repository to be created"
     required: true
-  pat_token:
-    description: "Secret token with permissions to create repositories"
-    required: true
-
-
 
 runs:
   using: composite
@@ -19,8 +14,6 @@ runs:
 
     - name: Check if repository exists
       id: check-repo
-      env:
-        GH_TOKEN: ${{ inputs.pat_token }}
       shell: bash
       run: |
         if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
@@ -32,8 +25,6 @@ runs:
     - name: Create new repository using GitHub CLI
       id: creating-repository
       if: ${{ steps.check-repo.outputs.exists == 'false' }}
-      env:
-        GH_TOKEN: ${{ inputs.pat_token }}
       shell: bash
       run: |
         if gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private; then
