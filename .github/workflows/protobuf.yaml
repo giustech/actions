@@ -38,16 +38,11 @@ jobs:
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
-    - name: Show
-      run:
-        echo "${{ needs.create.outputs.created }}"
+
     - name: Create README File
-      if: ${{ needs.create.outputs.created == 'true' }}
-      run: |
-        CONTENT=$(echo "Exemplo de texto para o arquivo" | base64 -w0)
-        gh api --method PUT \
-          -H "Accept: application/vnd.github+json" \
-          /repos/<owner>/<repo>/contents/README.md \
-          -f message="feat: Creating Readme.md" \
-          -f content="$CONTENT" \
-          -f branch="main"
+      if: ${{ needs.create.outputs.created == 'true' && inputs.language == 'java' }}
+      uses: giustech/actions/.github/actions/generate-initial-files-java@main
+
+    - name: Show
+      run: | 
+        ls -ltra
