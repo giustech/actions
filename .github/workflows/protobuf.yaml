@@ -26,6 +26,4 @@ jobs:
           GH_TOKEN: ${{ inputs.pat_token }}
           REPO_NAME: ${{ inputs.repository }}
         run: |
-          gh repo create ${{ github.repository_owner }}/$REPO_NAME --private --default-branch master
-          echo "Repositório criado com sucesso!"
-          echo "Acesse em: https://github.com/${{ github.repository_owner }}/$REPO_NAME"
+          gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private --default-branch master
