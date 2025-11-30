@@ -81,7 +81,7 @@ jobs:
 
     - name: Create README File
 #      if: ${{ needs.create.outputs.created == 'true' && inputs.language == 'java' }}
-      uses: giustech/actions/.github/actions/generate-initial-files-${{ inputs.language }}@main
+      uses: giustech/actions/.github/actions/generate-initial-files-java@main
 
     - name: Show
       run: | 
