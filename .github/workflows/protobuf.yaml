@@ -84,7 +84,7 @@ jobs:
     - name: Commit Workflows to New Repository
       run: |
         git config --global user.name "github-actions"
-        git config --global user.email "
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git
         mkdir -p .github/workflows
 
