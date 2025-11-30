@@ -46,7 +46,7 @@ jobs:
     - name: List YAML Files
       id: list-yaml
       run: |
-        mkdir -p generate-actions
+        mkdir -p generate-${{ inputs.language }}-actions
         echo "Listing YAML files in .github/templates/${{ inputs.language }}:"
         shopt -s nullglob
         FILES=(github-actions/.github/templates/${{ inputs.language }}/*.yaml)
