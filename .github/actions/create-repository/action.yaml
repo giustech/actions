@@ -9,7 +9,7 @@ inputs:
 outputs:
   created:
     description: "Whether the repository was created"
-    value: ${{ steps.creating-repository.outputs.created }}
+    value: ${{ steps.creating-repository.outputs.created == 'true' }}
 
 runs:
   using: composite
