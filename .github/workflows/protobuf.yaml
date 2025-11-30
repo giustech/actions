@@ -128,6 +128,12 @@ jobs:
           "$proto_file"
         done
 
+    - name: Move Java Files
+      if: inputs.language == 'java'
+      run: |
+        mkdir -p proto-stubs/java/src/main/java
+        mv proto-stubs/java/* proto-stubs/java/src/main/java/ || true
+
     - name: Setup Python
       uses: actions/setup-python@v5
       if: inputs.language == 'python'
@@ -164,7 +170,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         retention-days: 1
-        name: ${{ inputs.language }}-proto-stubs
+        name: generated-${{ inputs.language }}-proto
         path: proto-stubs/${{ inputs.language }}
 
 
@@ -201,7 +207,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         path: .
-        name: initial-files-${{ inputs.language }}
+        name: generated-${{ inputs.language }}-repository-files
 
 
 
@@ -221,8 +227,9 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.repository }}.git repo
         cd repo
+        rm -rf .
         mkdir -p .github/workflows
-        
+
     - name: Create Gitignore
       working-directory: repo
       run: |
@@ -238,9 +245,42 @@ jobs:
         name: generated-${{ inputs.language }}-actions
         path: repo/.github/workflows
 
+    - name: Download Artifacts Repository Files
+      uses: actions/download-artifact@v4
+      with:
+        name: generated-${{ inputs.language }}-repository-files
+        path: repo
+
+    - name: Download Artifacts Proto Generated
+      uses: actions/download-artifact@v4
+      with:
+        name: generated-${{ inputs.language }}-proto
+        path: repo
+
+
     - name: Commit Workflows to New Repository
       run: |
         cd repo
-        git add .gitignore .github/workflows/
-        git commit -m "Workflows added"
-        git push origin main
+    
+        # Adiciona e faz commit apenas se houver mudanças
+        git add -A
+        if ! git diff --cached --quiet; then
+          git commit -m "Workflows added"
+        else
+          echo "Sem alterações para commitar."
+        fi
+    
+        # Atualiza referências
+        git fetch origin
+    
+        # Troca para a branch delivery (cria se não existir)
+        if git ls-remote --exit-code --heads origin delivery >/dev/null 2>&1; then
+          git checkout delivery
+          git pull --ff-only origin delivery
+        else
+          git checkout -b delivery
+          git push -u origin delivery
+        fi
+    
+        # Garante que o commit foi enviado para delivery
+        git push origin delivery
