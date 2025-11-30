@@ -11,14 +11,28 @@ inputs:
 
 runs:
   using: composite
+  outputs:
+    created: ${{ steps.check-repo.outputs.exists == 'false' && steps.creating-repository.outputs.created == 'true' }}
   steps:
-    - name: 'Create new repository using GitHub CLI'
+
+    - name: Check if repository exists
+      id: check-repo
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.pat_token }}
-        REPO_NAME: ${{ inputs.repository }}
       run: |
-        gh repo create ${{ github.repository_owner }}/$REPO_NAME --private --default-branch master
-        echo "Repositório criado com sucesso!"
-        echo "Acesse em: https://github.com/${{ github.repository_owner }}/$REPO_NAME"
+        if gh repo view ${{ github.repository_owner }}/${{ inputs.repository }} --json name -q .name > /dev/null 2>&1; then
+          echo "exists=true"  >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create new repository using GitHub CLI
+      id: creating-repository
+      if: ${{ steps.check-repo.outputs.exists == 'false' }}
+      shell: bash
+      run: |
+        if gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private; then
+          echo "created=true" >> $GITHUB_OUTPUT
+        else
+          echo "created=false" >> $GITHUB_OUTPUT
+        fi
 
