@@ -20,10 +20,9 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
     steps:
-      - name: 'Create new repository using GitHub CLI'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ inputs.pat_token }}
-          REPO_NAME: ${{ inputs.repository }}
-        run: |
-          gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private --default-branch master
+    - name: 'Create new repository using GitHub CLI'
+      env:
+        GH_TOKEN: ${{ inputs.pat_token }}
+        REPO_NAME: ${{ inputs.repository }}
+      run: |
+        gh repo create ${{ github.repository_owner }}/${{ inputs.repository }} --private
