@@ -262,8 +262,12 @@ jobs:
     - name: Commit
       run: |
         cd repo
-        git pull
         git add -A
-        git commit -m "Workflows added"
-        git checkout -b delivery
-        git push origin delivery
+        git commit -m "Workflows added" || echo "No changes to commit"
+        if git ls-remote --exit-code --heads origin delivery >/dev/null 2>&1; then
+          git checkout delivery || (git fetch origin delivery && git checkout delivery)
+          git push origin delivery
+        else
+          git checkout -b delivery
+          git push --set-upstream origin delivery
+        fi
