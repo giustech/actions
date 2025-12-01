@@ -209,8 +209,6 @@ jobs:
         path: .
         name: generated-${{ inputs.language }}-repository-files
 
-
-
   commit:
     name: "Commit Repository"
     runs-on: ubuntu-latest
@@ -261,9 +259,10 @@ jobs:
         name: generated-${{ inputs.language }}-proto
         path: repo
 
-    - name: Commit Workflows to New Repository
+    - name: Commit
       run: |
         cd repo
+        git pull
         git add -A
         git commit -m "Workflows added"
         git checkout -b delivery
