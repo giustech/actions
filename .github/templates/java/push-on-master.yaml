@@ -58,7 +58,9 @@ jobs:
           latest_tag="${{ env.latest_tag }}"
           version="${latest_tag#v}"
           IFS='.' read -r major minor patch <<< "$version"
-          case "${{ github.event.inputs.TAG }}" in
+          tag_type="${{ github.event.inputs.TAG }}"
+          tag_type="${tag_type:-patch}"
+          case "$tag_type" in
             major)
               new_version="$((major + 1)).0.0"
               ;;
@@ -85,7 +87,6 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Push Pom
-        if: ${{ env.new_version != 'v' }}"
         run: |
           git status
           git diff pom.xml
