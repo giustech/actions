@@ -260,15 +260,6 @@ jobs:
         path: repo
 
     - name: Commit
-      if: needs.create.outputs.created == 'true'
-      run: |
-        cd repo
-        git add -A
-        git commit -m "Init files" || echo "No changes to commit"
-        git push origin main
-
-    - name: Commit
-      if: needs.create.outputs.created == 'false'
       run: |
         cd repo
         git add -A
@@ -280,3 +271,4 @@ jobs:
           git checkout -b delivery
           git push --set-upstream origin delivery
         fi
+        
