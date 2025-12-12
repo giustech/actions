@@ -1,3 +1,5 @@
+# Generated in 20251212011941
+# Hash: b63f6b12215985367503159cda4dc91a9d34fd15
 name: Push to Delivery
 
 on:
@@ -12,6 +14,10 @@ on:
 concurrency:
   group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -36,3 +42,92 @@ jobs:
 
       - name: Verify build
         run: mvn verify
+
+
+  open-pull-request:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        id: create_pr
+        run: |
+          PR_URL=$(gh pr create \
+            --base master \
+            --repo ${{ github.repository }} \
+            --head delivery \
+            --title "🚀 Release Automation[${{ github.ref_name }}]: ${{ inputs.versionament }}" \
+            --body "## 🚀 Automated Release Update
+          
+          ### Versão: \`${{ inputs.versionament }}\`
+          
+          Esta Pull Request foi gerada automaticamente pelo pipeline de CD e contém:
+          
+          - ✅ Atualização de versão para \`${{ inputs.versionament }}\`
+          - ✅ Configurações atualizadas para implantação
+          - ✅ Artefatos prontos para produção
+          
+          ---
+          *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*")
+          
+          echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+          
+          # Extrair o número do PR do URL
+          PR_NUMBER=$(echo $PR_URL | sed -E 's|.*/pull/([0-9]+).*|\1|')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+          
+          echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+
+
+      - name: Notify Discord Webhook
+        if: steps.create_pr.outputs.PR_NUMBER != ''
+        run: |
+          # Criar um arquivo temporário com o JSON
+          cat > discord_payload.json << EOF
+          {
+            "embeds": [
+              {
+                "title": "🚀 Nova Pull Request de Release Criada",
+                "description": "Uma nova PR de release foi criada automaticamente pelo pipeline de CD.",
+                "color": 3447003,
+                "fields": [
+                  {
+                    "name": "Repositório",
+                    "value": "${{ github.repository }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "PR #",
+                    "value": "[#${{ steps.create_pr.outputs.PR_NUMBER }}](${{ steps.create_pr.outputs.PR_URL }})",
+                    "inline": true
+                  },
+                  {
+                    "name": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Versão",
+                    "value": "${{ needs.generate-versionament.outputs.version }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Hash",
+                    "value": "${{ needs.generate-hash.outputs.content }}",
+                    "inline": true
+                  }
+                ],
+                "footer": {
+                  "text": "GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"
+                }
+              }
+            ]
+          }
+          EOF
+          
+          # Enviar o arquivo para o webhook
+          curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} \
+            -H "Content-Type: application/json" \
+            -d @discord_payload.json

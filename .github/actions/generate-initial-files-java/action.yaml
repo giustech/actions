@@ -138,7 +138,7 @@ runs:
         <distributionManagement>
           <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/soustify/data-gateway-buffer-java</url>
+            <url>https://maven.pkg.github.com/${{ github.repository_owner }}/${{ inputs.repository }}</url>
           </repository>
         </distributionManagement>
       

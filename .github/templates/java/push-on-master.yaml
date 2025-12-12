@@ -1,13 +1,129 @@
-name: Push to Master
+# Generated in 20251212011941
+# Hash: b63f6b12215985367503159cda4dc91a9d34fd15
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      TAG:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+  push:
+    paths:
+      - 'src/**'
+    branches:
+      - master
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: false
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+permissions:
+  contents: write
+  pull-requests: write
 
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Generate Release
+    permissions:
+      contents: write
+      packages: write
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get Latest Tag
+        id: get-latest-tag
+        run: |
+          latest_tag=$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          if [ -z "$latest_tag" ]; then
+            latest_tag="v0.0.0"
+          fi
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Calculate New Version
+        id: calculate-version
+        run: |
+          latest_tag="${{ env.latest_tag }}"
+          version="${latest_tag#v}"
+          IFS='.' read -r major minor patch <<< "$version"
+          case "${{ github.event.inputs.TAG }}" in
+            major)
+              new_version="$((major + 1)).0.0"
+              ;;
+            minor)
+              new_version="$major.$((minor + 1)).0"
+              ;;
+            patch)
+              new_version="$major.$minor.$((patch + 1))"
+              ;;
+          esac
+          echo "New version: v$new_version"
+          echo "new_version=v$new_version" >> $GITHUB_ENV
+
+      - name: Update POM Version
+        run: |
+          version_without_v=$(echo "${{ env.new_version }}" | sed 's/^v//')
+          echo "Setting Maven version to $version_without_v"
+          mvn versions:set -DnewVersion=$version_without_v -DgenerateBackupPoms=false
+
+      - name: Init Repository
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+
+      - name: Push Pom
+        run: |
+          git status
+          git diff pom.xml
+          git add pom.xml
+          git commit -m "chore: bump version to ${{ env.new_version }}"
+          git push origin master
+
+      - name: Create and Push Tag
+        run: |
+          git tag "${{ env.new_version }}"
+          git push origin "${{ env.new_version }}"
+
+      - name: Setup Java and Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Configure Maven Settings for GitHub Packages
+        run: |
+          mkdir -p $HOME/.m2
+          cat <<EOF > $HOME/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ github.actor }}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Build and Deploy to GitHub Packages
+        run: |
+          mvn clean install --settings $HOME/.m2/settings.xml
+          mvn deploy --settings $HOME/.m2/settings.xml
