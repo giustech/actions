@@ -209,6 +209,24 @@ jobs:
         path: .
         name: generated-${{ inputs.language }}-repository-files
 
+    - name: Checkout Repository
+      if: needs.create.outputs.created
+      uses: actions/checkout@v4
+      with:
+        path: 'init-repository'
+        repository: '${{ github.repository_owner }}/${{ inputs.repository }}'
+
+    - name: Initializing Java files
+      if: needs.create.outputs.created
+      run: |
+        cp -rp . init-repository/
+        cd init-repository
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "Initial project structure" || echo "No changes to commit"
+        git push origin main
+
   commit:
     name: "Commit Repository"
     runs-on: ubuntu-latest
