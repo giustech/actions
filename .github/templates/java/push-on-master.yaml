@@ -85,6 +85,7 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Push Pom
+        if: ${{ env.new_version != 'v' }}"
         run: |
           git status
           git diff pom.xml
