@@ -1,0 +1,119 @@
+# Generated in 20251212011941
+# Hash: b63f6b12215985367503159cda4dc91a9d34fd15
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      TAG:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+  push:
+    paths:
+      - 'src/**'
+    branches:
+      - master
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Generate Release
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from pom.xml
+        id: extract_version
+        run: |
+          # Parse the pom.xml safely with Python (handles Maven namespace if present)
+          VERSION=$(python - <<'PY'
+            import xml.etree.ElementTree as ET
+            
+            tree = ET.parse('pom.xml')
+            root = tree.getroot()
+            # common maven namespace
+            ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+            # try namespaced lookup first, then fallback to no-namespace
+            v = root.find('m:version', ns)
+            if v is None:
+                v = root.find('version')
+            version = v.text.strip() if v is not None and v.text else ''
+            if not version:
+                raise SystemExit('VERSION_NOT_FOUND')
+            print(version)
+            PY
+          )
+
+          # Ensure tags are fetched and check remote for the exact tag
+          git fetch --tags --prune
+          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q .; then
+            TAG_EXISTS=true
+          else
+            TAG_EXISTS=false
+          fi
+
+          echo "new_version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag_exists=${TAG_EXISTS}" >> $GITHUB_OUTPUT
+          echo "Detected version: ${VERSION}, tag_exists=${TAG_EXISTS}"
+
+      - name: Create and Push Tag
+        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
+        run: |
+          git tag "${{ steps.extract_version.outputs.new_version }}"
+          git push origin "${{ steps.extract_version.outputs.new_version }}"
+
+      - name: Setup Java and Maven
+        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Configure Maven Settings for GitHub Packages
+        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
+        run: |
+          mkdir -p $HOME/.m2
+          cat <<EOF > $HOME/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ github.actor }}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Build and Deploy to GitHub Packages
+        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
+        run: |
+          mvn clean install --settings $HOME/.m2/settings.xml
+          mvn deploy --settings $HOME/.m2/settings.xml
+
