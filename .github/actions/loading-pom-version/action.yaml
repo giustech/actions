@@ -5,15 +5,17 @@ inputs:
     required: false
     default: "pom.xml"
 
+outputs:
+  version:
+    description: "Loaded version from pom.xml"
+    value: ${{ steps.load-pom-version.outputs.version }}
+
 runs:
   using: composite
-  outputs:
-    version:
-      description: "Loaded version from pom.xml"
-      value: ${{ steps.load-pom-version.outputs.version }}
   steps:
   - name: Loading Pom Version
     id: load-pom-version
     shell: bash
     run: |
-      VERSION=python .github/scripts/loading-pom-version.py ${{ inputs.pom_path }}
+      VERSION=$(python ${{ github.action_path }}/../../scripts/loading-pom-version.py ${{ inputs.pom_path }})
+      echo "version=$VERSION" >> $GITHUB_OUTPUT
