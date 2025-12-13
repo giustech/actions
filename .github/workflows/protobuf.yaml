@@ -186,17 +186,19 @@ jobs:
         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         LATEST_TAG=$(gh api repos/${{ github.repository_owner }}/${{ inputs.repository }}/tags --jq '.[0].name' 2>/dev/null || echo "")
+        # Remove leading 'v' if present (e.g., v0.0.0 -> 0.0.0)
+        STRIPPED_TAG=${LATEST_TAG#v}
         
         if [ -z "$LATEST_TAG" ]; then
-          echo "Laste Version Not Found, setting to 0.0.1"
+          echo "Latest version not found, setting to 0.0.1"
           echo "version=0.0.1" >> $GITHUB_OUTPUT
+          echo "Using version: 0.0.1"
         else
-          echo "Latest Version Found: $LATEST_TAG"
-          echo "version=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest version found: $LATEST_TAG (normalized: $STRIPPED_TAG)"
+          echo "version=$STRIPPED_TAG" >> $GITHUB_OUTPUT
+          echo "Using version: ${STRIPPED_TAG}"
         fi
         
-        echo "Using version: ${LATEST_TAG:-0.0.0}"
-
     - name: Generate Java files
       if: inputs.language == 'java'
       uses: giustech/actions/.github/actions/generate-initial-files-java@main
@@ -273,4 +275,3 @@ jobs:
           git checkout -b delivery
           git push --set-upstream origin delivery
         fi
-        
