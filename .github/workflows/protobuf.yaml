@@ -263,15 +263,21 @@ jobs:
         name: generated-${{ inputs.language }}-proto
         path: repo
 
-    - name: Commit
+    - name: Commit and Push Changes
+      working-directory: repo
       run: |
-        cd repo
-        git add -A
-        git commit -m "Workflows added" || echo "No changes to commit"
         if git ls-remote --exit-code --heads origin delivery >/dev/null 2>&1; then
+          git fetch origin delivery || true
           git checkout delivery || (git fetch origin delivery && git checkout delivery)
-          git push origin delivery
         else
           git checkout -b delivery
+        fi
+
+        git add -A
+        git commit -m "Workflows added" || echo "No changes to commit"
+
+        if git rev-parse --verify --quiet origin/delivery >/dev/null 2>&1; then
+          git push origin delivery
+        else
           git push --set-upstream origin delivery
         fi
