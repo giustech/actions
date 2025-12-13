@@ -4,20 +4,10 @@ name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      TAG:
-        description: 'Version increment type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
 
   push:
-    paths:
-      - 'src/**'
+#    paths:
+#      - 'src/**'
     branches:
       - master
 
@@ -31,9 +21,47 @@ permissions:
 
 
 jobs:
+
+  loading-files:
+    name: Loading files
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.load-version.outputs.version }}
+      tag_exists: ${{ steps.extract_version.outputs.tag_exists }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Load POM Version
+      id: load-version
+      uses: Giustech/actions/.github/actions/loading-pom-version@main
+
+    - name: Use the version no mesmo job
+      run: |
+        echo "Version: ${{ steps.load-version.outputs.version }}"
+        
+
+    - name: Extract version from pom.xml
+      id: extract_version
+      run: |       
+        # Ensure tags are fetched and check remote for the exact tag
+        git fetch --tags --prune
+        if git ls-remote --tags origin "refs/tags/v${{ steps.load-version.outputs.version }}" | grep -q .; then
+          TAG_EXISTS=true
+        else
+          TAG_EXISTS=false
+        fi
+        
+        echo "new_version=v${{ steps.load-version.outputs.version }}" >> $GITHUB_OUTPUT
+        echo "tag_exists=${TAG_EXISTS}" >> $GITHUB_OUTPUT
+        echo "Detected version: ${{ steps.load-version.outputs.version }}, tag_exists=${TAG_EXISTS}"
+
+
   release:
     runs-on: ubuntu-latest
     name: Generate Release
+    needs: loading-files
+    if: ${{ needs.loading-files.outputs.tag_exists == 'false' }}
     permissions:
       contents: write
       packages: write
@@ -43,48 +71,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract version from pom.xml
-        id: extract_version
-        run: |
-          # Parse the pom.xml safely with Python (handles Maven namespace if present)
-          VERSION=$(python - <<'PY'
-            import xml.etree.ElementTree as ET
-            
-            tree = ET.parse('pom.xml')
-            root = tree.getroot()
-            # common maven namespace
-            ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
-            # try namespaced lookup first, then fallback to no-namespace
-            v = root.find('m:version', ns)
-            if v is None:
-                v = root.find('version')
-            version = v.text.strip() if v is not None and v.text else ''
-            if not version:
-                raise SystemExit('VERSION_NOT_FOUND')
-            print(version)
-            PY
-          )
-
-          # Ensure tags are fetched and check remote for the exact tag
-          git fetch --tags --prune
-          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q .; then
-            TAG_EXISTS=true
-          else
-            TAG_EXISTS=false
-          fi
-
-          echo "new_version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "tag_exists=${TAG_EXISTS}" >> $GITHUB_OUTPUT
-          echo "Detected version: ${VERSION}, tag_exists=${TAG_EXISTS}"
-
       - name: Create and Push Tag
-        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
         run: |
-          git tag "${{ steps.extract_version.outputs.new_version }}"
-          git push origin "${{ steps.extract_version.outputs.new_version }}"
+          git tag "v${{ needs.loading-files.outputs.version }}"
+          git push --tags
 
       - name: Setup Java and Maven
-        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -93,7 +85,6 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Configure Maven Settings for GitHub Packages
-        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
         run: |
           mkdir -p $HOME/.m2
           cat <<EOF > $HOME/.m2/settings.xml
@@ -112,8 +103,6 @@ jobs:
           EOF
 
       - name: Build and Deploy to GitHub Packages
-        if: ${{ steps.extract_version.outputs.tag_exists == 'false' }}
         run: |
           mvn clean install --settings $HOME/.m2/settings.xml
           mvn deploy --settings $HOME/.m2/settings.xml
-
