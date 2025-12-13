@@ -193,7 +193,7 @@ jobs:
           echo "version=$LATEST_TAG" >> $GITHUB_OUTPUT
         fi
         
-        echo "Using version: ${LATEST_TAG:-0.0.1}"
+        echo "Using version: ${LATEST_TAG:-0.0.0}"
 
     - name: Generate Java files
       if: inputs.language == 'java'
