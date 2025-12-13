@@ -191,8 +191,8 @@ jobs:
         
         if [ -z "$LATEST_TAG" ]; then
           echo "Latest version not found, setting to 0.0.1"
-          echo "version=0.0.1" >> $GITHUB_OUTPUT
-          echo "Using version: 0.0.1"
+          echo "version=0.0.0" >> $GITHUB_OUTPUT
+          echo "Using version: 0.0.0"
         else
           echo "Latest version found: $LATEST_TAG (normalized: $STRIPPED_TAG)"
           echo "version=$STRIPPED_TAG" >> $GITHUB_OUTPUT
