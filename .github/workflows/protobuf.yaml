@@ -188,8 +188,10 @@ jobs:
         LATEST_TAG=$(gh api repos/${{ github.repository_owner }}/${{ inputs.repository }}/tags --jq '.[0].name' 2>/dev/null || echo "")
         
         if [ -z "$LATEST_TAG" ]; then
+          echo "Laste Version Not Found, setting to 0.0.1"
           echo "version=0.0.1" >> $GITHUB_OUTPUT
         else
+          echo "Latest Version Found: $LATEST_TAG"
           echo "version=$LATEST_TAG" >> $GITHUB_OUTPUT
         fi
         

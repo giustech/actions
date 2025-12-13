@@ -14,6 +14,15 @@ inputs:
 runs:
   using: composite
   steps:
+  - name: Generate Next Version
+    id: generate-version
+    shell: bash
+    run: |
+      IFS='.' read -r MAJOR MINOR PATCH <<< "${{ inputs.version }}"
+      PATCH=$((PATCH + 1))
+      NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+      echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
 
   - name: Generate Pom
     shell: bash
@@ -28,7 +37,7 @@ runs:
         <groupId>com.giustech</groupId>
         <artifactId>${{ inputs.repository }}</artifactId>
         <packaging>jar</packaging>
-        <version>${{ inputs.version }}</version>
+        <version>${{ steps.generate-version.outputs.new_version }}</version>
       
         <properties>
           <protobuf.version>3.23.4</protobuf.version>
