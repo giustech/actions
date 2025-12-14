@@ -5,7 +5,7 @@ on:
 
   push:
     paths:
-      - 'internal/**'
+      - 'pkg/**'
     branches:
       - master
 
