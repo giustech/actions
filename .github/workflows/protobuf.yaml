@@ -167,10 +167,32 @@ jobs:
       run: |
         npm install -g grpc-tools
 
-    - name: Generate ${{ inputs.language }} Stubs
+    - name: Install Protoc and grpc-web plugin
       if: inputs.language == 'javascript'
       run: |
-        grpc_tools_node_protoc --proto_path=proto --js_out=import_style=commonjs,binary:proto-stubs/javascript --grpc_out=grpc_js:proto-stubs/javascript $(find proto -name "*.proto" -type f)
+        # Instala protoc
+        PROTOC_VERSION=21.12
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip
+        unzip protoc-${PROTOC_VERSION}-linux-x86_64.zip -d $HOME/protoc
+        
+        # Instala grpc-web plugin
+        wget https://github.com/grpc/grpc-web/releases/download/1.4.2/protoc-gen-grpc-web-1.4.2-linux-x86_64
+        chmod +x protoc-gen-grpc-web-1.4.2-linux-x86_64
+        mv protoc-gen-grpc-web-1.4.2-linux-x86_64 $HOME/protoc/bin/protoc-gen-grpc-web
+
+    - name: Generate JavaScript/TypeScript Stubs
+      if: inputs.language == 'javascript'
+      run: |
+        $HOME/protoc/bin/protoc \
+          --proto_path=proto \
+          --js_out=import_style=commonjs:proto-stubs/javascript \
+          --grpc-web_out=import_style=typescript,mode=grpcwebtext:proto-stubs/javascript \
+          $(find proto -name "*.proto" -type f)
+
+#    - name: Generate ${{ inputs.language }} Stubs
+#      if: inputs.language == 'javascript'
+#      run: |
+#        grpc_tools_node_protoc --proto_path=proto --js_out=import_style=commonjs,binary:proto-stubs/javascript --grpc_out=grpc_js:proto-stubs/javascript $(find proto -name "*.proto" -type f)
 
     - name: Upload Files
       uses: actions/upload-artifact@v4
@@ -214,14 +236,12 @@ jobs:
         application: ${{ inputs.repository }}
         version: '${{ steps.get-tag.outputs.version }}'
 
-
     - name: Generate Go files
       if: inputs.language == 'go'
       uses: giustech/actions/.github/actions/generate-initial-files-go@main
       with:
         repository: ${{ inputs.repository }}
         application: ${{ inputs.repository }}
-
 
     - name: Upload Initial Files
       uses: actions/upload-artifact@v4
