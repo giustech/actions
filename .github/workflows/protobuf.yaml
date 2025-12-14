@@ -151,7 +151,7 @@ jobs:
       if: inputs.language == 'python'
       run: |
 #        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
-        find proto -name "*.proto" -type f -exec python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python {} +
+        find proto -name "*.proto" -type f -exec python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python {} \+
 
 
     - name: Setup Node.js
