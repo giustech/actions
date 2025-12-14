@@ -17,6 +17,7 @@ jobs:
   create:
     name: "Create Repository"
     runs-on: ubuntu-latest
+    if: inputs.language != 'python'
     outputs:
       created: ${{ steps.create-repo.outputs.created }}
     steps:
@@ -34,6 +35,7 @@ jobs:
   loading-workflows:
     name: "Loading Workflows"
     runs-on: ubuntu-latest
+    if: inputs.language != 'python'
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -54,7 +56,6 @@ jobs:
           for f in "${FILES[@]}"; do
             FILE_NAME="${f##github-actions/.github/templates/${{ inputs.language }}/}"
             TIME_STAMP="$(date +%Y%m%d%H%M%S)"
-    
             {
               echo "# Generated in ${TIME_STAMP}"
               echo "# Hash: ${{ github.sha }}"
@@ -147,8 +148,6 @@ jobs:
       run: |
         pip install grpcio-tools
 
-#        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
-
     - name: Generate ${{ inputs.language }} Stubs
       if: inputs.language == 'python'
       shell: bash
@@ -157,7 +156,6 @@ jobs:
           python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --pyi_out=proto-stubs/python --grpc_python_out=proto-stubs/python "$proto_file"
         done
         
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       if: inputs.language == 'javascript'
@@ -186,6 +184,7 @@ jobs:
     name: "Prepare Repository"
     runs-on: ubuntu-latest
     needs: [ create, generate-protobuf ]
+    if: inputs.language != 'python'
     steps:
 
     - name: Get Latest Tag
@@ -234,6 +233,7 @@ jobs:
     name: "Commit Repository"
     runs-on: ubuntu-latest
     needs: [ create, loading-workflows, prepare-repository ]
+    if: inputs.language != 'python'
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
     steps:
