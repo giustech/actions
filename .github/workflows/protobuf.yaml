@@ -102,8 +102,8 @@ jobs:
     - name: Generate ${{ inputs.language }} Stubs
       if: inputs.language == 'go'
       run: |
-        protoc --proto_path=proto --go_out=proto-stubs/go --go-grpc_out=proto-stubs/go --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative $(find proto -name "*.proto" -type f)
-
+        protoc --proto_path=proto --go_out=proto-stubs/go/pkg --go-grpc_out=proto-stubs/go/pkg --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative $(find proto -name "*.proto" -type f)
+        
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -229,8 +229,6 @@ jobs:
     needs: [ create, loading-workflows, prepare-repository ]
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-    outputs:
-      created: ${{ steps.create-repo.outputs.created }}
     steps:
 
     - name: Clone Repository
