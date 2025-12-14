@@ -165,14 +165,17 @@ jobs:
     - name: Install JavaScript Dependencies
       if: inputs.language == 'javascript'
       run: |
-        npm install -g grpc-tools @grpc/grpc-js ts-proto
+        mkdir -p proto-gen-js && cd proto-gen-js
+        npm init -y
+        npm install ts-proto
+        cd ..
 
     - name: Generate ${{ inputs.language }} Stubs
       if: inputs.language == 'javascript'
       run: |
         mkdir -p proto-stubs/javascript
         for proto_file in $(find proto -name "*.proto" -type f); do
-          npx protoc --proto_path=proto --plugin=protoc-gen-ts_proto=$(npm root -g)/.bin/protoc-gen-ts_proto --ts_proto_out=proto-stubs/javascript "$proto_file"
+          protoc --proto_path=proto --plugin=protoc-gen-ts_proto=./proto-gen-js/node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=proto-stubs/javascript "$proto_file"
         done
 
     - name: Upload Files
