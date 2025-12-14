@@ -62,6 +62,6 @@ jobs:
 
     - name: Create and Push Tag
       run: |
-        git tag "v${{ needs.loading-files.outputs.version }}"
+        git tag "${{ needs.loading-files.outputs.version }}"
         git push --tags
 
