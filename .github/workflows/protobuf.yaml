@@ -168,11 +168,17 @@ jobs:
         npm install -g ts-proto
 
     - name: Generate ${{ inputs.language }} Stubs
+      env:
+        OUT_DIR: proto-stubs/javascript
       if: inputs.language == 'javascript'
       run: |
-        mkdir -p proto-stubs/javascript
+        mkdir -p "$OUT_DIR"
         for proto_file in $(find proto -name "*.proto" -type f); do
-          protoc --proto_path=proto --plugin=protoc-gen-ts=$(npm root -g)/ts-proto/protoc-gen-ts --ts_out=proto-stubs/javascript "$proto_file"
+          protoc \
+            --proto_path=proto \
+            --js_out=import_style=commonjs:"$OUT_DIR" \
+            --grpc-web_out=import_style=typescript,mode=grpcweb:"$OUT_DIR" \
+            "$proto_file"
         done
 
     - name: Upload Files
