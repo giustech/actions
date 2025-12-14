@@ -1,0 +1,59 @@
+name: Generate Files for Java Repository
+inputs:
+  repository:
+    description: "Name of the repository to be created"
+    required: true
+  application:
+    description: "Name of the application"
+    required: true
+  version:
+    description: "Version of the application"
+    required: false
+    default: "1.0.0"
+
+runs:
+  using: composite
+  steps:
+
+  - name: Generate Pom
+    shell: bash
+    run: |
+      cat > go.mod <<'EOF'
+      module github.com/giustech/${{ inputs.repository }}
+      
+      go 1.25.0
+      
+      EOF
+      
+
+  - name: Create README File
+    shell: bash
+    run: |
+      cat > README.md <<'EOF'
+      # ${{ inputs.application }} - Protobuf Connector
+  
+      Este repositório contém os arquivos go geradas (stubs) a partir das definições Protobuf (`.proto`) da **[Sua Aplicação Principal]**.
+  
+      Esta biblioteca atua como um conector oficial, garantindo que serviços consumidores utilizem os contratos de dados e clientes gRPC corretos e atualizados.
+  
+      ---
+  
+      ## 📦 Instalação
+  
+      Configure o seu gerenciador de dependências conforme abaixo.
+  
+      ```shell
+      go env -w GOPRIVATE=github.com/giustech/*
+      go env -w GOPROXY=direct
+      git config --global url."[email protected]:".insteadOf "https://github.com/"
+      go get -u github.com/giustech/${{ inputs.repository }}
+      ```
+      EOF
+
+
+  - name: Create folders
+    shell: bash
+    run: |
+      mkdir -p .github/worfklows
+      mkdir -p internal
+
