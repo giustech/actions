@@ -172,7 +172,7 @@ jobs:
       run: |
         mkdir -p proto-stubs/javascript
         for proto_file in $(find proto -name "*.proto" -type f); do
-          npx ts-proto --proto_path=proto --ts_out=proto-stubs/javascript "$proto_file"
+          protoc --proto_path=proto --plugin=protoc-gen-ts=$(npm root -g)/ts-proto/protoc-gen-ts --ts_out=proto-stubs/javascript "$proto_file"
         done
 
     - name: Upload Files
