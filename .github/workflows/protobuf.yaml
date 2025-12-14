@@ -147,12 +147,15 @@ jobs:
       run: |
         pip install grpcio-tools
 
+#        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
+
     - name: Generate ${{ inputs.language }} Stubs
       if: inputs.language == 'python'
       shell: bash
       run: |
-        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
-
+        for proto_file in $(find proto -name "*.proto" -type f); do
+          python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python "$proto_file"
+        done
     - name: Setup Node.js
       uses: actions/setup-node@v4
       if: inputs.language == 'javascript'
