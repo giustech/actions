@@ -150,14 +150,8 @@ jobs:
     - name: Generate ${{ inputs.language }} Stubs
       if: inputs.language == 'python'
       run: |
-#        mkdir -p proto-stubs/python
 #        python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python $(find proto -name "*.proto" -type f)
-        python -m grpc_tools.protoc \
-          --proto_path=proto \
-          --python_out=proto-stubs/python \
-          --grpc_python_out=proto-stubs/python \
-          $(find proto -name "*.proto" -type f)
-
+        find proto -name "*.proto" -type f -exec python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python {} +
     - name: Setup Node.js
       uses: actions/setup-node@v4
       if: inputs.language == 'javascript'
