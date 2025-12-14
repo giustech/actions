@@ -1,13 +1,11 @@
-# Generated in 20251212011941
-# Hash: b63f6b12215985367503159cda4dc91a9d34fd15
 name: Release
 
 on:
   workflow_dispatch:
 
   push:
-#    paths:
-#      - 'src/**'
+    paths:
+      - 'src/**'
     branches:
       - master
 

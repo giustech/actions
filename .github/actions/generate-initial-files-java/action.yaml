@@ -182,8 +182,8 @@ runs:
           maven {
               url = uri("https://maven.pkg.github.com/[SEU_USUARIO]/[SEU_REPOSITORIO]")
               credentials {
-                  username = System.getenv("GITHUB_ACTOR") ?: "SEU_USUARIO"
-                  password = System.getenv("GITHUB_TOKEN") ?: "SEU_TOKEN"
+                  username = System.getenv("GPR_USER") ?: "SEU_USUARIO"
+                  password = System.getenv("GPR_TOKEN") ?: "SEU_TOKEN"
               }
           }
       }
