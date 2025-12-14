@@ -154,8 +154,10 @@ jobs:
       shell: bash
       run: |
         for proto_file in $(find proto -name "*.proto" -type f); do
-          python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --grpc_python_out=proto-stubs/python "$proto_file"
+          python -m grpc_tools.protoc --proto_path=proto --python_out=proto-stubs/python --pyi_out=proto-stubs/python --grpc_python_out=proto-stubs/python "$proto_file"
         done
+        
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       if: inputs.language == 'javascript'
