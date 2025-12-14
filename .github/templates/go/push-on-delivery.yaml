@@ -37,6 +37,9 @@ jobs:
           go env -w GOPRIVATE=github.com/giustech
           go env -w GOPROXY=direct
 
+      - name: Instead of config
+        run: git config --global url."https://oauth2:${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Tidy
         run: go mod tidy
 
