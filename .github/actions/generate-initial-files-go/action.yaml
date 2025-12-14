@@ -6,10 +6,6 @@ inputs:
   application:
     description: "Name of the application"
     required: true
-  version:
-    description: "Version of the application"
-    required: false
-    default: "1.0.0"
 
 runs:
   using: composite

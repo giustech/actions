@@ -208,6 +208,15 @@ jobs:
         application: ${{ inputs.repository }}
         version: '${{ steps.get-tag.outputs.version }}'
 
+
+    - name: Generate Go files
+      if: inputs.language == 'go'
+      uses: giustech/actions/.github/actions/generate-initial-files-go@main
+      with:
+        repository: ${{ inputs.repository }}
+        application: ${{ inputs.repository }}
+
+
     - name: Upload Initial Files
       uses: actions/upload-artifact@v4
       with:
